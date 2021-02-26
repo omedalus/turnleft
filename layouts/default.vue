@@ -1,9 +1,6 @@
 <template>
   <v-app dark>
     <v-main>
-      <v-btn @click="onClicked">
-      </v-btn>
-
       <v-container>
         <nuxt />
       </v-container>
