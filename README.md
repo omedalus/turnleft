@@ -166,6 +166,67 @@ Basically, it thinks that being in a ```HALLWAY``` and going forward has an equa
 
 ## Distilling the Conundrum
 
+At issue is the fact that, once in the corner, the AI can take two courses of action that result in its leaving the corner. One sends it down the wrong hallway, the other sends it down the correct one.
+
+We can take for granted that a fully savvy bot, having explored its full environment and built a fully populated state transition diagram, will be able to use a minimax search to find its way to and from the start to the corner, and will always execute one of the two maneuvers that result in its departure from the corner. We can thus abstract the bot's actions, from the bot's POV, with the following simplified state transitions:
+1. Start --> Hallway
+1. Hallway --> Reward *OR* Corner *OR* Start, no way to predict
+1. Corner --> Hallway (via ```TURN LEFT``` *OR* via ```TURN AROUND```, doesn't matter)
+
+That, of course, is how the bot sees its situation. We humans know the situation is a little bit more complex, but also more predictable. I'll leave out the wrong paths, because we never need to traverse those if we can differentiate the correct ones from the wrong ones.
+1. Start --> Hallway Before Corner
+1. Hallway Before Corner --> Corner
+1. Corner --> Hallway After Corner
+1. Hallway After Corner --> Reward
+
+So here's where I'm going with all of this. The key issue is that there exists a *hidden state*, a state that the bot unwittingly affects but that isn't part of its immediate sensorium. Put roughly, the situation goes like this:
+1. The bot is in some observable state *H*.
+1. The bot takes some action ```F``` that puts it into observable state *C*.
+1. In state *C*, the bot can take two different actions, call them ```L``` and ```B```.
+   1. ```B``` will put the bot back into state *H*.
+   1. ```L``` will put the bot into state state *H'*.
+   1. According to the bot's sensors, *H* is indistinguishable from *H'*.
+1. In state *H'*, taking action ```F``` results in a reward.
+
+Framed thus, the question of states and actions and all that jazz almost becomes moot. We can arguably smooth this entire matter down into the following scenario:
+1. The bot is in a locked room. The room has a door (with a crashbar) and a button. The bot receives a reward for opening the door.
+1. The bot has a vocabulary of two actions: ```PUSH DOOR``` and ```PUSH BUTTON```
+1. The door has an unobservable locked/unlocked state. The door starts in the locked state.
+1. If the bot tries to ```PUSH DOOR``` while the door is locked, then nothing happens.
+1. If the bot performs ```PUSH BUTTON```, then the door transitions to an unlocked state. If it was already unlocked, then it stays unlocked. The bot doesn't hear a "click" or somesuch transition indicator.
+1. If the bot tries to ```PUSH DOOR``` while the door is unlocked, then the bot wins and receives its reward.
+
+So here's the state transition diagram in its entirety.
+
+| Observed State (Unobserved) | ```PUSH_BUTTON```          | ```PUSH_DOOR```         |
+|-----------------------------|----------------------------|-------------------------|
+| Start (Door Locked)         | Start (Door Unlocked)      | *(IDENTITY)*            |
+| Start (Door Unlocked)       | *(IDENTITY)*               | Reward                  |
+| Reward                      | *(N/A)*                    | *(N/A)*                 |
+
+And, as they say: And that's the show!
+
+(NOTE: Later we can see what happens when the button only works 50% of the time.)
+
+The trouble is that this isn't what the bot perceives. What the bot perceives is this:
+
+| Observed State | ```PUSH_BUTTON```  | ```PUSH_DOOR```                     |
+|----------------|--------------------|-------------------------------------|
+| Start          | *(IDENTITY)*       | 50%: *(IDENTITY)*, 50%: Reward      |
+| Reward         | *(N/A)*            | *(N/A)*                             |
+
+As far as the bot sees things, based on its experience of trying random things and noting results,
+pressing the button never does anything, whereas pushing the door seems to work about 50% of the time.
+So it makes no sense to ever push the button; your best bet is to just keep trying the door.
+
+How do we get the bot to realize that there's a causal link between pressing the button
+and the door being openable?
+
+That's a hard question.
+
+
+
+
 
 
 
