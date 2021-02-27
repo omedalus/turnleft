@@ -224,6 +224,42 @@ and the door being openable?
 
 That's a hard question.
 
+## Proposing a Solution
+
+This scenario of realizing that one first has to push a button to unlock a door is intriguing because it addresses
+whether or not the agent can infer causation. This is, of course, ultimately an epistemological problem, not just
+a statistical one. That's *why* it's hard.
+
+### Conjecture: An Assumption of Causality is Parsimonious
+
+Note that a pigeon in a Skinner box can, of course, be taught to press a button in order to open a hatch that
+contains a reward. We know from an extraordinary number of actual experiments, as well as application of
+Morgan's Canon, as well as straight-up common sense, that the pigeon does in fact learn that pressing the button
+causes the reward. However, the pigeon doesn't necessarily *have* to learn this -- that is, it doesn't necessarily
+follow from some kind of "first principles" that the pigeon *must* learn that the button opens the hatch.
+It would be entirely rational for the pigeon to believe that, hey, maybe the hatch just opens on its own sometimes,
+and the pressing of the button has nothing to do with anything.
+
+I propose that the fact that the pigeon does in fact learn to press the button to open the hatch comes from
+the application of a built-in bias within cognitive systems to assume that the world is "linear",
+for want of a more fitting term. That is,
+the world in any time frame can almost always be assumed to be the same as it was in the previous time frame,
+except in ways that the organism explicitly *made* it be different. Objects stay where you put them; events
+don't just spontaneously happen for no reason; and if a dropped apple would fall to the ground yesterday, then
+it will still fall to the ground today, and will still do so tomorrow.
+
+Reality isn't actually "linear" in this sense. But it's *close enough* to
+what I'm loosely imagining as "linear" that intelligence bothered to evolve in the first place.
+If the laws of physics and the nature of reality were more "linear" than they actually are,
+i.e. simpler and more predictable, with a more static and unchanging environment,
+then intelligence would be unnecessary (and arguably there wouldn't be sufficient variance in structure
+to permit the rise of biological life in the first place anyway). If nature was less linear, i.e.
+more chaotic and unpredictable, with events occurring through unseen antecedents or possibly
+with no antecedents whatsoever, then intelligence wouldn't be useful to evolve because it would
+be futile. It is only within this narrow band of predictability that mammalian intelligence, up
+to and including Homo sapiens, could arise.
+
+
 
 
 
