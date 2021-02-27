@@ -230,7 +230,7 @@ This scenario of realizing that one first has to push a button to unlock a door 
 whether or not the agent can infer causation. This is, of course, ultimately an epistemological problem, not just
 a statistical one. That's *why* it's hard.
 
-### Conjecture: An Assumption of Causality is Parsimonious
+### Theory: An Assumption of Causality is Parsimonious
 
 Note that a pigeon in a Skinner box can, of course, be taught to press a button in order to open a hatch that
 contains a reward. We know from an extraordinary number of actual experiments, as well as application of
@@ -259,7 +259,44 @@ with no antecedents whatsoever, then intelligence wouldn't be useful to evolve b
 be futile. It is only within this narrow band of predictability that mammalian intelligence, up
 to and including Homo sapiens, could arise.
 
+Therefore, the pigeon *must* assume that *something **causes** the door to get unlocked*, and that this
+"something" *must be something that the pigeon itself does*.
 
+Let's put this contrapositively: The pigeon *could* assume that the door just sometimes opens by itself
+sometimes. But then the pigeon would have to believe that it exists in a universe in which things
+sometimes just happen by themselves. That is a much more disruptive assumption, with much more far-reaching
+and frankly terrifying ramifications, than the pigeon's belief that its locus of control is still
+internal.
+
+Naturally, we all know that the pigeon *does* live in a universe in which things "just happen".
+The pigeon probably knows this to an extent as well, in the same way that we all do, per Morgan's Canon.
+The pigeon is not spared the existential horror of Lovecraftian revelations merely by
+trying to believe in the controllability of this one door. None of us are. Think of the citizens of Pompeii,
+having lived for generations at the base of this (as far as they knew) unique geological formation, when
+one day, for absolutely no reason and no warning, the Earth itself turned inside out, causing the air
+itself to choke them and the ground to flow like water and burn hotter than fire, in direct contradiction
+to every fundamental law of reality they had ever conceived of; and the whole time, a significant
+portion of them were recorded to ask, "What did we do to cause this? How did we anger the gods?"
+
+However, the fact remains that a *tendency* towards this assumption, even if false and even
+in situations in which it's ultimately futile, is the only approach that's *useful*. You can,
+of course, just assume that everything is chaos and randomness and the universe has no order, sure.
+But doing so makes you miss the little bits of predictability that *do* exist, the small sunlit
+"placid island[s] of ignorance in the midst of black seas of infinity[.]" It ultimately comes down
+to Pascal's Wager: Insofar as the world is ordered, seeking that order confers a bit of gain;
+and insofar as the world is chaotic, seeking order anyway confers no loss. In fact, it doesn't
+even guaranteeably confer a loss of time or energy, because you can't take for granted that
+you would have that time or energy to begin with, or that any saving of time or energy can be
+counted on, if the universe were truly pure chaos; that is, if one makes the argument, "It's
+all futile, so you might as well save your breath," one is implicitly acknowledging that the
+act of saving your breath is itself not simply also destined to be futile.
+
+Besides, it appears that the laws of reality are such that "linearity" does tend to increase with locality.
+The Pompeiians couldn't control the Earth's magma; the dinosaurs couldn't control the trajectories
+of asteroids; but that pigeon can at least control that hatch. In the words of Jordan Peterson,
+you might not be able to put the whole world in order, but you can at least clean your room.
+
+###
 
 
 
