@@ -196,13 +196,15 @@ Framed thus, the question of states and actions and all that jazz almost becomes
 1. If the bot performs ```PUSH BUTTON```, then the door transitions to an unlocked state. If it was already unlocked, then it stays unlocked. The bot doesn't hear a "click" or somesuch transition indicator.
 1. If the bot tries to ```PUSH DOOR``` while the door is unlocked, then the bot wins and receives its reward.
 
+I'll also add an operation called ```RESET``` that permits the agent the opportunity to return the puzzle to its starting state.
+
 So here's the state transition diagram in its entirety.
 
-| Observed State (Unobserved) | ```PUSH_BUTTON```          | ```PUSH_DOOR```         |
-|-----------------------------|----------------------------|-------------------------|
-| Start (Door Locked)         | Start (Door Unlocked)      | *(IDENTITY)*            |
-| Start (Door Unlocked)       | *(IDENTITY)*               | Reward                  |
-| Reward                      | *(N/A)*                    | *(N/A)*                 |
+| Observed State (Unobserved) | ```PUSH_BUTTON```          | ```PUSH_DOOR```       | ```RESET```             | Reward |
+|-----------------------------|----------------------------|-----------------------|-------------------------|--------|
+| Captivity (Door Locked)     | Captivity (Door Unlocked)  | *(IDENTITY)*          | *(IDENTITY)*            |        |
+| Captivity (Door Unlocked)   | *(IDENTITY)*               | Freedom               | Captivity (Door Locked) |        |
+| Freedom                     | *(IDENTITY)*               | *(IDENTITY)*          | Captivity (Door Locked) | +1     |
 
 And, as they say: And that's the show!
 
@@ -210,10 +212,10 @@ And, as they say: And that's the show!
 
 The trouble is that this isn't what the bot perceives. What the bot perceives is this:
 
-| Observed State | ```PUSH_BUTTON```  | ```PUSH_DOOR```                     |
-|----------------|--------------------|-------------------------------------|
-| Start          | *(IDENTITY)*       | 50%: *(IDENTITY)*, 50%: Reward      |
-| Reward         | *(N/A)*            | *(N/A)*                             |
+| Observed State | ```PUSH_BUTTON```  | ```PUSH_DOOR```                                 | ```RESET```   | Reward |
+|----------------|--------------------|-------------------------------------------------|---------------|--------|
+| Captivity      | *(IDENTITY)*       | Sometimes: *(IDENTITY)*, Sometimes: Freedom     | *(IDENTITY)*  |        |
+| Freedom        | *(N/A)*            | *(N/A)*                                         | Captivity     | +1     |
 
 As far as the bot sees things, based on its experience of trying random things and noting results,
 pressing the button never does anything, whereas pushing the door seems to work about 50% of the time.
@@ -248,7 +250,23 @@ except in ways that the organism explicitly *made* it be different. Objects stay
 don't just spontaneously happen for no reason; and if a dropped apple would fall to the ground yesterday, then
 it will still fall to the ground today, and will still do so tomorrow.
 
-Reality isn't actually "linear" in this sense. But it's *close enough* to
+Mind you, by "linear" I don't merely
+mean "deterministic", but something even more rigid: deterministic in an observable, predictable, static
+sort of way. That is, some might argue that the rolling of a die is "deterministic" on the level of molecular
+kinematics; but, unless you had some kind of impossible instrument that could measure the positions and velocities
+of every molecule of the die without affecting them, then that determinism is not usable in any way by any
+cognitive system. Therefore, from the point of view of an intelligent agent, there's no functional difference between
+a "deterministic" die versus one that is genuinely nondeterministic. If one had two dice, one that was
+genuinely nondeterministic due to some kind of quantum magic, and the other kinematically deterministic
+but whose predictability was based solely on a corpus of data inaccessible to the experimenter (i.e. the
+positions and velocities of every constituent molecule of the die), then no possible experiment could
+distinguish one from the other. As such, the notion that a physical die is "deterministic" reduces the
+notion of determinism to something purely academic, and ultimately useless.
+In other words, what I'm seeking
+to describe is more than just physical determinism, but a sort of "perceptual determinism", or "actionable
+determinism", with relevance to a problem-solving agent.
+
+Reality isn't actually "linear" in this sense. But reality is *close enough* to
 what I'm loosely imagining as "linear" that intelligence bothered to evolve in the first place.
 If the laws of physics and the nature of reality were more "linear" than they actually are,
 i.e. simpler and more predictable, with a more static and unchanging environment,
@@ -256,7 +274,7 @@ then intelligence would be unnecessary (and arguably there wouldn't be sufficien
 to permit the rise of biological life in the first place anyway). If nature was less linear, i.e.
 more chaotic and unpredictable, with events occurring through unseen antecedents or possibly
 with no antecedents whatsoever, then intelligence wouldn't be useful to evolve because it would
-be futile. It is only within this narrow band of predictability that mammalian intelligence, up
+be futile. It is only within this narrow band of predictability that animal intelligence, up
 to and including Homo sapiens, could arise.
 
 Therefore, the pigeon *must* assume that *something **causes** the door to get unlocked*, and that this
@@ -265,8 +283,11 @@ Therefore, the pigeon *must* assume that *something **causes** the door to get u
 Let's put this contrapositively: The pigeon *could* assume that the door just sometimes opens by itself
 sometimes. But then the pigeon would have to believe that it exists in a universe in which things
 sometimes just happen by themselves. That is a much more disruptive assumption, with much more far-reaching
-and frankly terrifying ramifications, than the pigeon's belief that its locus of control is still
-internal.
+and frankly terrifying ramifications, than for the pigeon to believe that its locus of control is still
+internal. It is in fact *simpler*, i.e. more *parsimonius*, for the pigeon to believe that it lives
+in an observable, deterministic, mostly-static universe, and that the hatch is controlled by the button
+which is in turn controlled by the pigeon; than for it to believe that the hatch just opens
+sometimes by itself.
 
 Naturally, we all know that the pigeon *does* live in a universe in which things "just happen".
 The pigeon probably knows this to an extent as well, in the same way that we all do, per Morgan's Canon.
@@ -293,10 +314,23 @@ act of saving your breath is itself not simply also destined to be futile.
 
 Besides, it appears that the laws of reality are such that "linearity" does tend to increase with locality.
 The Pompeiians couldn't control the Earth's magma; the dinosaurs couldn't control the trajectories
-of asteroids; but that pigeon can at least control that hatch. In the words of Jordan Peterson,
+of asteroids; but that pigeon can at least control the hatch in its box. In the words of Jordan Peterson,
 you might not be able to put the whole world in order, but you can at least clean your room.
 
-###
+I suppose it would be fair to summarize all of the above thus: Just as the thermodynamicist (or
+Aristotle) asserts that nature abhors a vacuum, the intelligent agent likewise asserts that
+nature abhors uncontrollability. It may not be *true* -- i.e. nature might be totally fine
+with being outside the control of the agent -- but the intelligent agent must make the *assumption*
+that uncontrollability is the exception rather than the norm.
+To the intelligent agent, an event that lacks observably deterministic controllability
+provides a clue that there is in fact some precursory action that the agent is actually
+performing without knowing it. The agent must function under the assumption that it is fact
+doing *something* to please or anger the gods; the agent just needs to find out what that
+something is.
+
+### Stochastic Conjectures
+
+We can approach the ques
 
 
 
