@@ -200,6 +200,8 @@ I'll also add an operation called ```RESET``` that permits the agent the opportu
 
 So here's the state transition diagram in its entirety.
 
+**Pigeon Table: Experimenter's POV**
+
 | Observed State (Unobserved) | ```PUSH_BUTTON```          | ```PUSH_DOOR```       | ```RESET```             | Reward |
 |-----------------------------|----------------------------|-----------------------|-------------------------|--------|
 | Captivity (Door Locked)     | Captivity (Door Unlocked)  | *(IDENTITY)*          | *(IDENTITY)*            |        |
@@ -210,7 +212,9 @@ And, as they say: And that's the show!
 
 (NOTE: Later we can see what happens when the button only works 50% of the time.)
 
-The trouble is that this isn't what the bot perceives. What the bot perceives is this:
+The trouble is that this isn't what the bot perceives. What the bot perceives is this.
+
+**Pigeon Table: Pigeon's POV**
 
 | Observed State | ```PUSH_BUTTON```  | ```PUSH_DOOR```                                 | ```RESET```   | Reward |
 |----------------|--------------------|-------------------------------------------------|---------------|--------|
@@ -330,7 +334,14 @@ something is.
 
 ### Stochastic Conjectures
 
-We can approach the ques
+Let's take a close look at *Pigeon Table: Pigeon's POV*. Specifically, look at the cell (Captivity, ```PUSH_DOOR```).
+The fact that its transition is labeled as *sometimes* going to one subsequent state and *sometimes* to another
+should be a critical indicator that there is some hidden variable in play, some unobserved property of the
+world that gets set by something that the agent does.
+
+We don't know what that variable is, how it gets set,
+or how many values it might possibly have (or if, indeed, it is discrete or continuous, and if continuous then
+what its range is). But let's crawl before we fly.
 
 
 
