@@ -332,7 +332,7 @@ performing without knowing it. The agent must function under the assumption that
 doing *something* to please or anger the gods; the agent just needs to find out what that
 something is.
 
-### Stochastic Conjectures about Hidden Variables
+### Inventing Hidden Variables to Blame
 
 Let's take a close look at *Pigeon Table: Pigeon's POV*. Specifically, look at the cell (Captivity, ```PUSH_DOOR```).
 The fact that its transition is labeled as *sometimes* going to one subsequent state and *sometimes* to another
@@ -349,9 +349,51 @@ Let's make some simplifying assumptions.
 
 The latter assumption makes it possible to narrow down the range of options as to what exactly causes the transition of the variable. That is, if I try the door and find that it's locked, and then I go do some stuff, and then I come back and try the door again and find that it's *not* locked, then we can assume that one of the things we did caused the door to become unlocked.
 
+### Walking Through the Pigeon Box by Hand
 
+Let's go step by step through the actions of an agent in the pigeon box.
 
+~~The agent starts out in the observable state of Captivity. It is tasked with populating a state transition table so as to develop a model that will enable it to reliably acquire a reward. This table is, of course, a means to an end; when complete, the agent will be able to simply run a search algorithm to make optimal decisions to get from its present state to its goal state. However, its ability to make optimal decisions is dependent on the completeness of this table. It will therefore be motivated by an intrinsic tradeoff between going straight for the acquisition of a goal and the filling of its table. This can be thought of as a "curiosity" hyperparameter, and it can depend on how much reward the agent has recently acquired -- that is, an agent that has recently been "sated", i.e. has acquired enough nutrients to be comfortable, may have a higher curiosity than one that is starving.~~ This is great for later, but is largely a distraction for now. Let's put a pin in this. For now, the agent will use its search capabilities for the more straightforward task of just seeking reward directly.
 
+The agent starts out in the observable state of Captivity. The agent's state transition table starts out looking like this -- all unknown. Note that even Reward is unknown, because Reward is only doled out upon arrival into a state, and the agent never performs an action that involves arriving in the state of Captivity.
+
+| State Observed        | ```BUTTON```        | ```DOOR```        | ```RESET```   | Reward |
+|-----------------------|---------------------|-------------------|---------------|--------|
+| Captivity             | ???                 | ???               | ???           | ???    |
+
+From this state, based on this knowledge, the agent has absolutely no idea which action to take. None will lead it to any subsequent known reward transitions. As such, it can just randomly pick some action or another purely at random.
+
+By sheer coincidence, the agent could immediately execute a series of moves that grant it a reward, and then return it to its initial state. Or, the agent can be temporarily placed under player control -- "possessed" by the player, as it were, while it simply observes helplessly -- to make a specific sequence of actions for purely pedagogical purposes. Specifically, these actions are: ```BUTTON```, ```DOOR```, and ```RESET```, in that order. It will log the actions it performed and the states achieved. It may seem that we are giving the agent far too much credit to presume that it could immediately randomly pick exactly the right actions that will give it perfect performance, but the truth is that, in doing so, we are doing it no favors; this sequence of actions confers upon the agent the *least* possible amount of information about its world. By leading it down this garden path, we are actually tricking the agent into thinking that its world is simpler than it actually is.
+
+| State Observed        | ```BUTTON```        | ```DOOR```        | ```RESET```   | Reward |
+|-----------------------|---------------------|-------------------|---------------|--------|
+| Captivity             | Captivity           | Freedom           | ???           | 0      |
+| Freedom               | ???                 | ???               | Captivity     | +1     |
+
+At this point, remember that the last thing the bot did was ```RESET```. The bot is now back in the observable state of Captivity; and, unbeknownst to it, the door is back in a state of Locked. 
+
+From here, according to the bot's state transition table, its search algorithm can easily see that, if it performs the action ```DOOR```, it will follow the transition to Freedom and receive a reward. So it performs ```DOOR```. 
+
+And finds that, after performing ```DOOR```, it's still in a state of Captivity. And it says, "Huh!?"
+
+| State Observed        | ```BUTTON```        | ```DOOR```                      | ```RESET```   | Reward |
+|-----------------------|---------------------|---------------------------------|---------------|--------|
+| Captivity             | Captivity           | ~~Freedom~~ Captivity?!?!       | ???           | 0      |
+| Freedom               | ???                 | ???                             | Captivity     | +1     |
+
+Well, there's only two explanations for why ```DOOR``` would have taken us to Freedom before but takes us to Captivity now: 
+1. The transition is inherently nondeterministic.
+1. The transition is mediated by a hidden variable that we somehow changed.
+
+Because of all of that philosophizing in the previous section, we choose to believe the latter.
+
+The agent, then, has to imagine that there exists a hidden variable, one that the agent can't directly observe but whose state can be inferred by the operation of the door. The agent can *define* the hidden variable as a Boolean whose value was False when the ```DOOR``` action produced the previously observed Freedom transition, but is True now that it's producing the Captivity transition. The agent has no way to know what the variable's state was when prior actions were taken -- specifically, when it performed ```BUTTON``` or ```RESET```.
+
+| State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
+|----------------------------------|---------------------|---------------------------------|------------------|--------|
+| Captivity + False                | Captivity + ???     | Freedom                         | ???              | 0      |
+| Captivity + True                 | Captivity + ???     | Captivity + ???                 | ???              | 0      |
+| Freedom + ???                    | ???                 | ???                             | Captivity + ???  | +1     |
 
 
 
