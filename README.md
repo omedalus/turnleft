@@ -332,16 +332,23 @@ performing without knowing it. The agent must function under the assumption that
 doing *something* to please or anger the gods; the agent just needs to find out what that
 something is.
 
-### Stochastic Conjectures
+### Stochastic Conjectures about Hidden Variables
 
 Let's take a close look at *Pigeon Table: Pigeon's POV*. Specifically, look at the cell (Captivity, ```PUSH_DOOR```).
 The fact that its transition is labeled as *sometimes* going to one subsequent state and *sometimes* to another
 should be a critical indicator that there is some hidden variable in play, some unobserved property of the
 world that gets set by something that the agent does.
 
-We don't know what that variable is, how it gets set,
-or how many values it might possibly have (or if, indeed, it is discrete or continuous, and if continuous then
-what its range is). But let's crawl before we fly.
+We don't know what that variable is, how it gets set, or how many values it might possibly have
+(or if, indeed, it is discrete or continuous, and if continuous then what its range is). But let's 
+crawl before we fly. 
+
+Let's make some simplifying assumptions.
+* The hidden variable is Boolean. This is a pretty safe baseline assumption -- either it *is* a thing, or it isn't. Even if it were a continuous variable, then nonetheless an intelligent agent would only care about its value insofar as it *is* or it *isn't* beyond some threshold or within some range. The act of making a decision collapses the metaphorical wave function.
+* The hidden variable entirely determines the outcome of the seemingly unpredictable process.
+
+The latter assumption makes it possible to narrow down the range of options as to what exactly causes the transition of the variable. That is, if I try the door and find that it's locked, and then I go do some stuff, and then I come back and try the door again and find that it's *not* locked, then we can assume that one of the things we did caused the door to become unlocked.
+
 
 
 
