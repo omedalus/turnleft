@@ -368,7 +368,7 @@ By sheer coincidence, the agent could immediately execute a series of moves that
 | State Observed        | ```BUTTON```        | ```DOOR```        | ```RESET```   | Reward |
 |-----------------------|---------------------|-------------------|---------------|--------|
 | Captivity             | Captivity           | Freedom           | ???           | 0      |
-| Freedom               | ???                 | ???               | Captivity     | +1     |
+| Freedom               | ???                 | ???               | **Captivity** | +1     |
 
 At this point, remember that the last thing the bot did was ```RESET```. The bot is now back in the observable state of Captivity; and, unbeknownst to it, the door is back in a state of Locked. 
 
@@ -378,22 +378,71 @@ And finds that, after performing ```DOOR```, it's still in a state of Captivity.
 
 | State Observed        | ```BUTTON```        | ```DOOR```                      | ```RESET```   | Reward |
 |-----------------------|---------------------|---------------------------------|---------------|--------|
-| Captivity             | Captivity           | ~~Freedom~~ Captivity?!?!       | ???           | 0      |
+| Captivity             | Captivity           | **~~Freedom~~ Captivity?!?!**   | ???           | 0      |
 | Freedom               | ???                 | ???                             | Captivity     | +1     |
 
 Well, there's only two explanations for why ```DOOR``` would have taken us to Freedom before but takes us to Captivity now: 
 1. The transition is inherently nondeterministic.
 1. The transition is mediated by a hidden variable that we somehow changed.
 
-Because of all of that philosophizing in the previous section, we choose to believe the latter.
+Because of the reasons laid out in all of that philosophizing in the previous section, we choose to believe the latter.
 
-The agent, then, has to imagine that there exists a hidden variable, one that the agent can't directly observe but whose state can be inferred by the operation of the door. The agent can *define* the hidden variable as a Boolean whose value was False when the ```DOOR``` action produced the previously observed Freedom transition, but is True now that it's producing the Captivity transition. The agent has no way to know what the variable's state was when prior actions were taken -- specifically, when it performed ```BUTTON``` or ```RESET```.
+The agent, then, has to imagine that there exists a hidden variable, one that the agent can't directly observe but whose state can be inferred by the operation of the door. The agent can *define* the hidden variable as a Boolean whose value was False when the ```DOOR``` action produced the previously observed Freedom transition, but is True now that it's producing the Captivity transition. The agent has no way to know what the variable's state was when prior actions were taken -- specifically, when it performed ```BUTTON``` or ```RESET```. It also has no way to know whether or not the variable's state *stays* True after it performs the revelatory action.
 
 | State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
 |----------------------------------|---------------------|---------------------------------|------------------|--------|
-| Captivity + False                | Captivity + ???     | Freedom                         | ???              | 0      |
-| Captivity + True                 | Captivity + ???     | Captivity + ???                 | ???              | 0      |
+| Captivity + False                | Captivity + ???     | Freedom + ???                   | ???              | 0      |
+| Captivity + True                 | Captivity + ???     | **Captivity + ???**             | ???              | 0      |
 | Freedom + ???                    | ???                 | ???                             | Captivity + ???  | +1     |
 
+So now here the agent is, having just tried the door and having found it to return it to the observable Captivity state. It just followed the transition ("Captivity + True", ```DOOR```) -> "Captivity + ???" (marked in bold). That is, we know that the origin state has a hidden variable value of True because -- much like Einstein defined time as "the phenomenon of nature that is measured with a clock" -- we *defined* the hidden variable to be whatever it is in the world that, when we are in the observable Captivity state,  makes ```DOOR``` take us to the observable Freedom state when it's False and back to the observable Captivity state when it's True.
+
+Well, the agent is in a bit of a conundrum now. Having just followed that transition to "Captivity + ???", the agent now has no idea what state it's in. Fortunately, it can find out -- by trying the door! Remember, the hidden variable is that which makes the door work. Because we are currently in the observable Captivity state, if we try the door now and find that it takes us to Freedom, we will know that the state we came from had a hidden variable value of False. Of course, we will transition to some other state, Freedom + ???, and within that state we won't know the hidden variable's value because we don't know what exactly makes the variable change. But we can at least try it now and get some information about the state we are in now.
+
+The search algorithm isn't interested directly in populating the table, though. The search algorithm is interested in getting to a Reward state, which it knows is "Freedom + ???". The bot might currently be in "Captivity + True" or "Captivity + False", it doesn't know. (It's in "Captivity + True", but shh, don't tell it that.) The search engine will search both possibilities. If the bot is currently in state "Captivity + False", then ```DOOR``` will lead it straight to victory, which is an instant win. If we're currently in "Captivity + True", then ```DOOR``` will take us right back to where we are now -- which will reveal to us that the current state is "Captivity + True", and will tell us that we need to try some other course of action. This entire analysis is *also* true if the agent goes for ```BUTTON``` and ```RESET```, except for one thing: the bot already knows that ("Captivity + False", ```DOOR```) will result in reward -- and is, in fact, the *only* action that results in reward. So all possible actions are simply efforts to try to reach the state "Captivity + False", so that we can perform ```DOOR```. But there's a chance we're already *in* state "Captivity + False", so performing anything other than ```DOOR``` is simply reaching Freedom with extra steps. Therefore, if the search algorithm is constructed properly, it should return ```DOOR``` as the action with the shortest path to a reward.
+
+So, the agent tries ```DOOR``` and finds that, sure enough, it's still locked. So we know that we must have been in "Captivity + True". And, indeed, still are.
+
+| State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
+|----------------------------------|---------------------|---------------------------------|------------------|--------|
+| Captivity + False                | Captivity + ???     | Freedom + ???                   | ???              | 0      |
+| Captivity + True                 | Captivity + ???     | **Captivity + True**            | ???              | 0      |
+| Freedom + ???                    | ???                 | ???                             | Captivity + ???  | +1     |
+
+At this point the agent doesn't have a lot of options. The agent has established that, at "Captivity + True", the action ```DOOR``` is a reflexive cycle, so it can at least rule out trying the door again. It has incomplete information about what happens if it performs ```BUTTON```, and no information at all about what happens if it performs ```RESET```. Which one should it try first?
+
+In accordance with the old Dungeons & Dragons adage that it's better to kill one than wound two, let's suppose that it's better to get complete information about something previously thought known but now evidently laden with hidden meaning. So let's suppose that the agent chooses to investigate the state of the hidden variable in ```BUTTON``` transition.
+
+Actually, there's an incredibly good reason why the agent would want to try the button: Because the hidden variable is defined based on what happens when we try ```DOOR``` in the Captivity observed state, the value of the variable can only be tested when in the Captivity observed state. Therefore, the agent can prefer to seek out transitions that will put them into a state from which it can test its hidden variable.
+
+Ultimately, it's up to the search algorithm, which will seek the shortest route to a reward. The search algorithm *could* say, "Hey, you've never tried ```RESET```. When you're in an observed Captivity state, ```RESET``` could be an immediate reward button. You don't know!" And that's true, we don't. But we *do* know that we can reach a reward from "Captivity + False", and we know that there's a 50/50 chance that ```BUTTON``` will take us to "Captivity + False". The devil we know, in this case, is probably better than the devil we don't. If the devil we know involved many extra steps, and if we had some better way to quantify the uncertainty of the ```RESET``` action from this state, then we might ultimately choose to try ```RESET``` after all. But in this case, depending on how we engineer the search algorithm, the risk/reward doesn't seem worth it.
+
+So the bot tries ```BUTTON```, and finds itself in state "Captivity + ???". 
+
+| State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
+|----------------------------------|---------------------|---------------------------------|------------------|--------|
+| Captivity + False                | Captivity + ???     | Freedom + ???                   | ???              | 0      |
+| Captivity + True                 | **Captivity + ???** | Captivity + True                | ???              | 0      |
+| Freedom + ???                    | ???                 | ???                             | Captivity + ???  | +1     |
+
+From here, it does what it always does when it's in a Captivity state with an unknown hidden variable: it tries the door, which is its quickest best hope for freedom. It finds, lo and behold, that the door opens! The bot's new observable state is Freedom! That means that the state it transitioned from must have a hidden variable value of False.
+
+| State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
+|----------------------------------|---------------------|---------------------------------|------------------|--------|
+| Captivity + False                | Captivity + ???     | **Freedom + ???**               | ???              | 0      |
+| Captivity + True                 | Captivity + False   | Captivity + True                | ???              | 0      |
+| Freedom + ???                    | ???                 | ???                             | Captivity + ???  | +1     |
+
+Well, now that it's in a state of Freedom and has received its reward, there's not much for it to do but to try to get back to a state of "Captivity + False". From "Freedom + ???", we can temporarily assume that the hidden variable doesn't affect transitions in Freedom, though this may ultimately prove to be untrue. In Freedom, ```BUTTON``` and ```DOOR``` may well return it to "Captivity + False" (they won't), but ```RESET``` will definitely return it to Captivity + *something*. So, again, the search algorithm should choose the devil it knows.
+
+So, in the Freedom observed state, it performs ```RESET```, and finds itself in a state of "Captivity + ???". Well, sure enough, from here it tries the door, and finds it locked. So it knows that it had just come to "Captivity + True", and is therefore now in "Captivity + True" as well. 
+
+| State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
+|----------------------------------|---------------------|---------------------------------|------------------|--------|
+| Captivity + False                | Captivity + ???     | Freedom + ???                   | ???              | 0      |
+| Captivity + True                 | Captivity + False   | **Captivity + True**            | ???              | 0      |
+| Freedom + ???                    | ???                 | ???                             | Captivity + True | +1     |
+
+This now provides the bot with all the information it needs to solve the game perfectly indefinitely.
 
 
