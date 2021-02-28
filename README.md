@@ -340,8 +340,8 @@ should be a critical indicator that there is some hidden variable in play, some 
 world that gets set by something that the agent does.
 
 We don't know what that variable is, how it gets set, or how many values it might possibly have
-(or if, indeed, it is discrete or continuous, and if continuous then what its range is). But let's 
-crawl before we fly. 
+(or if, indeed, it is discrete or continuous, and if continuous then what its range is). But let's
+crawl before we fly.
 
 Let's make some simplifying assumptions.
 * The hidden variable is Boolean. This is a pretty safe baseline assumption -- either it *is* a thing, or it isn't. Even if it were a continuous variable, then nonetheless an intelligent agent would only care about its value insofar as it *is* or it *isn't* beyond some threshold or within some range. The act of making a decision collapses the metaphorical wave function.
@@ -370,9 +370,9 @@ By sheer coincidence, the agent could immediately execute a series of moves that
 | Captivity             | Captivity           | Freedom           | ???           | 0      |
 | Freedom               | ???                 | ???               | **Captivity** | +1     |
 
-At this point, remember that the last thing the bot did was ```RESET```. The bot is now back in the observable state of Captivity; and, unbeknownst to it, the door is back in a state of Locked. 
+At this point, remember that the last thing the bot did was ```RESET```. The bot is now back in the observable state of Captivity; and, unbeknownst to it, the door is back in a state of Locked.
 
-From here, according to the bot's state transition table, its search algorithm can easily see that, if it performs the action ```DOOR```, it will follow the transition to Freedom and receive a reward. So it performs ```DOOR```. 
+From here, according to the bot's state transition table, its search algorithm can easily see that, if it performs the action ```DOOR```, it will follow the transition to Freedom and receive a reward. So it performs ```DOOR```.
 
 And finds that, after performing ```DOOR```, it's still in a state of Captivity. And it says, "Huh!?"
 
@@ -381,7 +381,7 @@ And finds that, after performing ```DOOR```, it's still in a state of Captivity.
 | Captivity             | Captivity           | **~~Freedom~~ Captivity?!?!**   | ???           | 0      |
 | Freedom               | ???                 | ???                             | Captivity     | +1     |
 
-Well, there's only two explanations for why ```DOOR``` would have taken us to Freedom before but takes us to Captivity now: 
+Well, there's only two explanations for why ```DOOR``` would have taken us to Freedom before but takes us to Captivity now:
 1. The transition is inherently nondeterministic.
 1. The transition is mediated by a hidden variable that we somehow changed.
 
@@ -417,7 +417,7 @@ Actually, there's an incredibly good reason why the agent would want to try the 
 
 Ultimately, it's up to the search algorithm, which will seek the shortest route to a reward. The search algorithm *could* say, "Hey, you've never tried ```RESET```. When you're in an observed Captivity state, ```RESET``` could be an immediate reward button. You don't know!" And that's true, we don't. But we *do* know that we can reach a reward from "Captivity + False", and we know that there's a 50/50 chance that ```BUTTON``` will take us to "Captivity + False". The devil we know, in this case, is probably better than the devil we don't. If the devil we know involved many extra steps, and if we had some better way to quantify the uncertainty of the ```RESET``` action from this state, then we might ultimately choose to try ```RESET``` after all. But in this case, depending on how we engineer the search algorithm, the risk/reward doesn't seem worth it.
 
-So the bot tries ```BUTTON```, and finds itself in state "Captivity + ???". 
+So the bot tries ```BUTTON```, and finds itself in state "Captivity + ???".
 
 | State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
 |----------------------------------|---------------------|---------------------------------|------------------|--------|
@@ -435,7 +435,7 @@ From here, it does what it always does when it's in a Captivity state with an un
 
 Well, now that it's in a state of Freedom and has received its reward, there's not much for it to do but to try to get back to a state of "Captivity + False". From "Freedom + ???", we can temporarily assume that the hidden variable doesn't affect transitions in Freedom, though this may ultimately prove to be untrue. In Freedom, ```BUTTON``` and ```DOOR``` may well return it to "Captivity + False" (they won't), but ```RESET``` will definitely return it to Captivity + *something*. So, again, the search algorithm should choose the devil it knows.
 
-So, in the Freedom observed state, it performs ```RESET```, and finds itself in a state of "Captivity + ???". Well, sure enough, from here it tries the door, and finds it locked. So it knows that it had just come to "Captivity + True", and is therefore now in "Captivity + True" as well. 
+So, in the Freedom observed state, it performs ```RESET```, and finds itself in a state of "Captivity + ???". Well, sure enough, from here it tries the door, and finds it locked. So it knows that it had just come to "Captivity + True", and is therefore now in "Captivity + True" as well.
 
 | State Observed + Hidden Variable | ```BUTTON```        | ```DOOR```                      | ```RESET```      | Reward |
 |----------------------------------|---------------------|---------------------------------|------------------|--------|
@@ -444,5 +444,32 @@ So, in the Freedom observed state, it performs ```RESET```, and finds itself in 
 | Freedom + ???                    | ???                 | ???                             | Captivity + True | +1     |
 
 This now provides the bot with all the information it needs to solve the game perfectly indefinitely.
+
+### Constraints and Caveats
+
+We're representing the state exhaustively, i.e. as a combined union of all variables, observed and unobserved. This won't scale.
+
+In this limited toy problem, the hidden variable is testable from the same observed state in which it is settable. Because of this, it's unnecessary to track the state of the hidden variable back more than one turn. Naturally, this also won't scale. We'll have to make the problem a little bit harder later in order to force the variable to track for one more turn.
+
+Because of the latter observation, it's probably unnecessary at this stage to track the hidden variable all the way through the "Freedom" observable state. We'll definitely need to have *some* way to track the hidden variable through more than one action, but we'll jump off that bridge when we get to it.
+
+### Deep-dive into the search algorithm
+
+We can't just handwave over the search algorithm, of course. Remember, this isn't a model-free action-chooser, like a Q learner. This is a system that learns a model, acts within the structure of the learned model, and ultimately strategizes its actions to balance between receiving rewards within the known model and performing exploratory action to expand said model. Though we can postpone fleshing out the latter capability, we need to at least investigate how the agent chooses an action from a state.
+
+The general gist is a fairly simple minimax-like tree:
+1. The search starts from a root node. This root node will be of type "action node", and it will represent the "action" of currently existing.
+1. The root node is appended a set of children representing all possible current states. If the agent knows its current state with full specification, then the root node will only have one child.
+1. Each state node, before being added to the tree, first gets added to a "Traversed" memoization catalog. Implementation-wise, presumably the "Traversed" catalog will be a hash table, and each state node will be expressible as a unique string or other hashable value. This will help us avoid infinite loops and re-doing work. If the node is already in the memo, then it is not added to the tree.
+1. Each state node has a likelihood estimate. All of a node's children, i.e. a sibling set, get their likelihoods scaled such that their total probability sums to 1.
+1. Each state node has a reward estimate. Rewards are only applied when the agent performs an action that lands in a state. For the current state, the reward is inherently zero. You're already here, after all. Otherwise, the reward estimate would be scaled by the node's probability.
+1. Each state node's scaled reward estimate is propagated recursively up its parent. An Action node's Reward is the sum of the rewards of its State children, prorated by probabilty. A state node's reward is the max of the rewards of its action node children.
+1. For each state node, generate the set of all possible actions that we can perform (or more precisely, that we will bother investigating).
+1. For each action, generate an Action Node.
+1. For each Action Node, generate a set of possible resultant states.
+1. Append to each Action Node a set of child State Nodes
+1. Repeat from step 3, up to some maximum depth.
+
+This is pretty simple, but already complicated enough to pause for a while to go implement some unit tests for.
 
 
