@@ -218,10 +218,10 @@ describe('ExperienceState', () => {
   })
 
   describe('equals and clone', () => {
-    let estOrig = null as ExperienceState | null;
-    let estClone = null as ExperienceState | null;
+    let estOrig: ExperienceState;
+    let estClone: ExperienceState;
 
-    beforeAll(() => {
+    beforeEach(() => {
       estOrig = new ExperienceState({
         'alpha': true,
         'beta': false,
@@ -230,64 +230,56 @@ describe('ExperienceState', () => {
       estClone = estOrig.clone();
     });
 
-    // TODO: Use before() to set up estOrig and estClone;
-
     test('should produce a clone that is equal to the original.', () => {
       const isEqual = estOrig.equals(estClone);
       expect(isEqual).toBeTruthy();
     });
 
     test('should no longer be equal if a value is altered.', () => {
-      const estOrig = new ExperienceState({
-        'alpha': true,
-        'beta': false,
-        'gamma': false
-      });
-      const estClone = estOrig.clone();
-
       estOrig.setStatelet('gamma', true);
+      const isEqual = estOrig.equals(estClone);
+      expect(isEqual).toBeFalsy();
+    });
 
+    test('should no longer be equal if a value is added to the original.', () => {
+      estOrig.setStatelet('delta', true);
+      const isEqual = estOrig.equals(estClone);
+      expect(isEqual).toBeFalsy();
+    });
+
+    test('should no longer be equal if a value is added to the clone.', () => {
+      estClone.setStatelet('delta', true);
       const isEqual = estOrig.equals(estClone);
       expect(isEqual).toBeFalsy();
     });
 
     test('should no longer be equal if an observability is altered.', () => {
-      const estOrig = new ExperienceState({
-        'alpha': true,
-        'beta': false,
-        'gamma': false
-      });
-      const estClone = estOrig.clone();
+      const eslGammaBefore = estOrig.getStatelet('gamma');
+      expect(eslGammaBefore?.observable).toBeTruthy();
 
-      estOrig.setStatelet('gamma', false, true);
+      estOrig.setStatelet('gamma', false, false);
+      const eslGammaAfter = estOrig.getStatelet('gamma');
+      expect(eslGammaAfter?.observable).toBeFalsy();
 
       const isEqual = estOrig.equals(estClone);
       expect(isEqual).toBeFalsy();
     });
 
     test('should become equal again if values are set to the same thing.', () => {
-      const estOrig = new ExperienceState({
-        'alpha': true,
-        'beta': false,
-        'gamma': false
-      });
-      const estClone = estOrig.clone();
-
       estOrig.setStatelet('gamma', true, true);
       estClone.setStatelet('gamma', true, true);
-
       const isEqual = estOrig.equals(estClone);
       expect(isEqual).toBeTruthy();
     });
 
     test('should be reciprocal.', () => {
-      const estOrig = new ExperienceState({
-        'alpha': true,
-        'beta': false,
-        'gamma': false
-      });
-      const estClone = estOrig.clone();
-      e
+      let isEqual = estClone.equals(estOrig);
+      expect(isEqual).toBeTruthy();
+
+      estOrig.setStatelet('gamma', true);
+      estClone.setStatelet('delta', true);
+      isEqual = estClone.equals(estOrig);
+      expect(isEqual).toBeFalsy();
     });
 
   });

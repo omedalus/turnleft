@@ -77,7 +77,25 @@ export class ExperienceState
    */
   public equals(other: ExperienceState): boolean
   {
-    throw new Error('Not implemented');
+    const names = [...new Set([
+      ...Object.keys(this._statelets),
+      ...Object.keys(other._statelets)
+    ])];
+
+    for (let name of names) {
+      const eslOurs = this._statelets[name];
+      const elsTheirs = other._statelets[name];
+      if (!eslOurs || !elsTheirs) {
+        // It can't be null in both otherwise it wouldn't show up in our names
+        // list in the first place. So it's null in one but not the other,
+        // which makes them unequal.
+        return false;
+      }
+      if (!eslOurs.equals(elsTheirs)) {
+        return false;
+      }
+    }
+    return true;
   }
 
 
