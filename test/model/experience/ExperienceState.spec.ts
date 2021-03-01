@@ -192,6 +192,11 @@ describe('ExperienceState', () => {
 
         expect(est.value).toBe(true);
       }
+
+      // Make sure that the values were in fact set during iteration.
+      expect(estate.getStatelet('alpha')?.value).toBe(false);
+      expect(estate.getStatelet('beta')?.value).toBe(false);
+      expect(estate.getStatelet('gamma')?.value).toBe(false);
     });
 
     test('should iterate stably even if statelets are added during iteration.', () => {
@@ -212,6 +217,21 @@ describe('ExperienceState', () => {
       }
 
       expect(names).toHaveLength(3);
+
+      // Make sure that the extra statelets were in fact added.
+      const namesAfter = [];
+      for (let est of estate.statelets) {
+        const name = est.name;
+        namesAfter.push(name);
+      }
+
+      expect(namesAfter).toHaveLength(6);
+      expect(namesAfter).toContain('alpha');
+      expect(namesAfter).toContain('beta');
+      expect(namesAfter).toContain('gamma');
+      expect(namesAfter).toContain('alpha+1');
+      expect(namesAfter).toContain('beta+1');
+      expect(namesAfter).toContain('gamma+1');
     });
 
     test('should produce stable iteration even if same statelets added in different order.', () => {

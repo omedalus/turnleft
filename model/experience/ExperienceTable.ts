@@ -3,5 +3,5 @@ export class ExperienceTable
 {
 
 
-  public updateStateTransitions
+  //public updateStateTransitions
 };
