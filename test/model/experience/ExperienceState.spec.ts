@@ -1,0 +1,294 @@
+import { ExperienceState } from "~/model/experience/ExperienceState";
+
+describe('ExperienceState', () => {
+  describe('constructor', () => {
+    test('should be instantiable with an empty call.', () => {
+      const estate = new ExperienceState();
+      expect(estate).not.toBeNull();
+    });
+
+    test('should have observable statelets that it is instantiated with.', () => {
+      const estate = new ExperienceState({
+        'alpha': true,
+        'beta': false,
+        'gamma': false
+      });
+
+      const estAlpha = estate.getStatelet('alpha');
+      expect(estAlpha).not.toBeNull();
+      expect(estAlpha?.name).toBe('alpha');
+      expect(estAlpha?.value).toBe(true);
+      expect(estAlpha?.observable).toBe(true);
+
+      const estBeta = estate.getStatelet('beta');
+      expect(estBeta).not.toBeNull();
+      expect(estBeta?.name).toBe('beta');
+      expect(estBeta?.value).toBe(false);
+      expect(estBeta?.observable).toBe(true);
+
+      const estGamma = estate.getStatelet('gamma');
+      expect(estGamma).not.toBeNull();
+      expect(estGamma?.name).toBe('gamma');
+      expect(estGamma?.value).toBe(false);
+      expect(estGamma?.observable).toBe(true);
+    });
+
+    test('should contain all specified statelets, and only such statelets.', () => {
+      const estate = new ExperienceState({
+        'gamma': false,
+        'alpha': true,
+        'beta': false
+      });
+
+      const keysFound = [];
+      for (let est of estate.statelets) {
+        keysFound.push(est.name);
+      }
+
+      expect(keysFound).toContain('alpha');
+      expect(keysFound).toContain('beta');
+      expect(keysFound).toContain('gamma');
+      expect(keysFound).toHaveLength(3);
+    });
+  });
+
+  describe('setters and getters', () => {
+    test('should get what was set.', () => {
+      const estate = new ExperienceState();
+      estate.setStatelet('gamma', false, false);
+      estate.setStatelet('alpha', true);
+      estate.setStatelet('beta', false);
+
+      const estAlpha = estate.getStatelet('alpha');
+      expect(estAlpha).not.toBeNull();
+      expect(estAlpha?.name).toBe('alpha');
+      expect(estAlpha?.value).toBe(true);
+      expect(estAlpha?.observable).toBe(true);
+
+      const estBeta = estate.getStatelet('beta');
+      expect(estBeta).not.toBeNull();
+      expect(estBeta?.name).toBe('beta');
+      expect(estBeta?.value).toBe(false);
+      expect(estBeta?.observable).toBe(true);
+
+      const estGamma = estate.getStatelet('gamma');
+      expect(estGamma).not.toBeNull();
+      expect(estGamma?.name).toBe('gamma');
+      expect(estGamma?.value).toBe(false);
+      expect(estGamma?.observable).toBe(false);
+    });
+
+    test('should not get what was not set.', () => {
+      const estate = new ExperienceState();
+      estate.setStatelet('gamma', false, false);
+      estate.setStatelet('alpha', true);
+      estate.setStatelet('beta', false);
+
+      const estDelta = estate.getStatelet('delta');
+      expect(estDelta).toBeNull();
+    });
+
+    test('should be able to set a named value multiple times, but only retrieve the last set instance.', () => {
+      const estate = new ExperienceState();
+      estate.setStatelet('alpha', true, true);
+      estate.setStatelet('alpha', true, false);
+      estate.setStatelet('alpha', false, false);
+
+      const estAlpha = estate.getStatelet('alpha');
+      expect(estAlpha).not.toBeNull();
+      expect(estAlpha?.name).toBe('alpha');
+      expect(estAlpha?.value).toBe(false);
+      expect(estAlpha?.observable).toBe(false);
+    });
+
+    test('should return results by value, so that they\'re safe from manipulation.', () => {
+      const estate = new ExperienceState({'alpha': true});
+      const estAlphaBefore = estate.getStatelet('alpha');
+      expect(estAlphaBefore?.value).toBe(true);
+
+      if (estAlphaBefore) {
+        // This will always be safe, or else the test will gave failed by now.
+        // We're just keeping TypeScript happy.
+        estAlphaBefore.value = false;
+      }
+
+      const estAlphaAfter = estate.getStatelet('alpha');
+      expect(estAlphaBefore?.value).toBe(false);
+      expect(estAlphaAfter?.value).toBe(true);
+    });
+
+    test('should set results by value, so that they\'re safe from manipulation.', () => {
+      const estate = new ExperienceState({'alpha': true});
+      const estBefore = estate.getStatelet('alpha');
+
+      expect(estBefore?.name).toBe('alpha');
+      expect(estBefore?.value).toBe(true);
+
+      if (estBefore) {
+        estBefore.value = false;
+        estate.setStatelet(estBefore);
+
+        estBefore.name = 'gamma';
+        estBefore.value = true;
+        estBefore.observable = false;
+        estate.setStatelet(estBefore);
+      }
+
+      const estAlphaAfter = estate.getStatelet('alpha');
+      expect(estAlphaAfter?.name).toBe('alpha');
+      expect(estAlphaAfter?.value).toBe(false);
+      expect(estAlphaAfter?.observable).toBe(true);
+
+      const estGammaAfter = estate.getStatelet('gamma');
+      expect(estGammaAfter?.name).toBe('gamma');
+      expect(estGammaAfter?.value).toBe(true);
+      expect(estGammaAfter?.observable).toBe(false);
+    });
+  });
+
+  describe('iterator', () => {
+    test('should retrieve what was set, and only what was set.', () => {
+      const estate = new ExperienceState();
+      estate.setStatelet('gamma', false, false);
+      estate.setStatelet('alpha', true);
+      estate.setStatelet('beta', false);
+
+      const keysFound = [];
+      for (let est of estate.statelets) {
+        keysFound.push(est.name);
+      }
+
+      expect(keysFound).toContain('alpha');
+      expect(keysFound).toContain('beta');
+      expect(keysFound).toContain('gamma');
+      expect(keysFound).toHaveLength(3);
+    });
+
+    test('should retrieve iterated statelets by value.', () => {
+      const estate = new ExperienceState();
+      estate.setStatelet('gamma', true);
+      estate.setStatelet('alpha', true);
+      estate.setStatelet('beta', true);
+
+      for (let est of estate.statelets) {
+        est.value = false;
+        const estAfter = estate.getStatelet(est.name);
+
+        expect(estAfter).not.toBeNull();
+        expect(estAfter?.value).toBe(true);
+      }
+    });
+
+    test('should retrieve iterated statelets by value, even if they haven\'t been iterated over yet.', () => {
+      const estate = new ExperienceState();
+      estate.setStatelet('gamma', true);
+      estate.setStatelet('alpha', true);
+      estate.setStatelet('beta', true);
+
+      for (let est of estate.statelets) {
+        estate.setStatelet('gamma', false);
+        estate.setStatelet('alpha', false);
+        estate.setStatelet('beta', false);
+
+        expect(est.value).toBe(true);
+      }
+    });
+
+    test('should iterate stably even if statelets are added during iteration.', () => {
+      const estate = new ExperienceState();
+      estate.setStatelet('gamma', true);
+      estate.setStatelet('alpha', true);
+      estate.setStatelet('beta', true);
+
+      let i = 0;
+      const names = [];
+      for (let est of estate.statelets) {
+        i++;
+        expect(i).toBeLessThanOrEqual(3);
+
+        const name = est.name;
+        names.push(name);
+        estate.setStatelet(name + '+1', true);
+      }
+
+      expect(names).toHaveLength(3);
+    });
+
+
+  })
+
+  describe('equals and clone', () => {
+    let estOrig = null as ExperienceState | null;
+    let estClone = null as ExperienceState | null;
+
+    beforeAll(() => {
+      estOrig = new ExperienceState({
+        'alpha': true,
+        'beta': false,
+        'gamma': false
+      });
+      estClone = estOrig.clone();
+    });
+
+    // TODO: Use before() to set up estOrig and estClone;
+
+    test('should produce a clone that is equal to the original.', () => {
+      const isEqual = estOrig.equals(estClone);
+      expect(isEqual).toBeTruthy();
+    });
+
+    test('should no longer be equal if a value is altered.', () => {
+      const estOrig = new ExperienceState({
+        'alpha': true,
+        'beta': false,
+        'gamma': false
+      });
+      const estClone = estOrig.clone();
+
+      estOrig.setStatelet('gamma', true);
+
+      const isEqual = estOrig.equals(estClone);
+      expect(isEqual).toBeFalsy();
+    });
+
+    test('should no longer be equal if an observability is altered.', () => {
+      const estOrig = new ExperienceState({
+        'alpha': true,
+        'beta': false,
+        'gamma': false
+      });
+      const estClone = estOrig.clone();
+
+      estOrig.setStatelet('gamma', false, true);
+
+      const isEqual = estOrig.equals(estClone);
+      expect(isEqual).toBeFalsy();
+    });
+
+    test('should become equal again if values are set to the same thing.', () => {
+      const estOrig = new ExperienceState({
+        'alpha': true,
+        'beta': false,
+        'gamma': false
+      });
+      const estClone = estOrig.clone();
+
+      estOrig.setStatelet('gamma', true, true);
+      estClone.setStatelet('gamma', true, true);
+
+      const isEqual = estOrig.equals(estClone);
+      expect(isEqual).toBeTruthy();
+    });
+
+    test('should be reciprocal.', () => {
+      const estOrig = new ExperienceState({
+        'alpha': true,
+        'beta': false,
+        'gamma': false
+      });
+      const estClone = estOrig.clone();
+      e
+    });
+
+  });
+});

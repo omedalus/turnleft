@@ -470,6 +470,8 @@ The general gist is a fairly simple minimax-like tree:
 1. Append to each Action Node a set of child State Nodes
 1. Repeat from step 3, up to some maximum depth.
 
+The output of the search algorithm is a Plan. The Plan describes which states will be encountered, and which actions to perform in said states. If an action results in a state that isn't covered in the Plan, then the Plan needs to be recreated -- and, most importantly, the model that the Plan is based on needs to be rebuilt.
+
 This is pretty simple, but already complicated enough to pause for a while to go implement some unit tests for.
 
-
+Um. It's actually a lot more complicated than this, because we don't know certain aspects of our state until subsequent observation.
