@@ -105,6 +105,12 @@ export class ExperienceState
    */
   public toString(): string
   {
-    throw new Error('Not implemented');
+    // Very similar to the iterator, but we don't need to create safe copies.
+    let s = '';
+    Object.keys(this._statelets).sort().forEach(name => {
+      const esl = this._statelets[name];
+      s += esl.toString();
+    });
+    return s;
   }
 };

@@ -214,7 +214,31 @@ describe('ExperienceState', () => {
       expect(names).toHaveLength(3);
     });
 
+    test('should produce stable iteration even if same statelets added in different order.', () => {
+      const est1 = new ExperienceState();
+      const est2 = new ExperienceState();
 
+      est1.setStatelet('foo');
+      est1.setStatelet('bar');
+      est1.setStatelet('baz');
+      est1.setStatelet('quux');
+
+      est2.setStatelet('quux');
+      est2.setStatelet('baz');
+      est2.setStatelet('bar');
+      est2.setStatelet('foo');
+
+      const names1 = [];
+      for (let name of est1.statelets) {
+        names1.push(name);
+      }
+      const names2 = [];
+      for (let name of est2.statelets) {
+        names2.push(name);
+      }
+      // Fortunately Jest knows how to test elementwise equality of arrays.
+      expect(names1).toEqual(names2);
+    });
   })
 
   describe('equals and clone', () => {
@@ -228,6 +252,24 @@ describe('ExperienceState', () => {
         'gamma': false
       });
       estClone = estOrig.clone();
+    });
+
+    test('should equal reciprocally if same statelets set, even in different order.', () => {
+      const est1 = new ExperienceState();
+      const est2 = new ExperienceState();
+
+      est1.setStatelet('foo');
+      est1.setStatelet('bar');
+      est1.setStatelet('baz');
+      est1.setStatelet('quux');
+
+      est2.setStatelet('quux');
+      est2.setStatelet('baz');
+      est2.setStatelet('bar');
+      est2.setStatelet('foo');
+
+      expect(est1.equals(est2)).toBeTruthy();
+      expect(est2.equals(est1)).toBeTruthy();
     });
 
     test('should produce a clone that is equal to the original.', () => {
@@ -272,7 +314,7 @@ describe('ExperienceState', () => {
       expect(isEqual).toBeTruthy();
     });
 
-    test('should be reciprocal.', () => {
+    test('should ensure that equality is reciprocal.', () => {
       let isEqual = estClone.equals(estOrig);
       expect(isEqual).toBeTruthy();
 
@@ -282,5 +324,57 @@ describe('ExperienceState', () => {
       expect(isEqual).toBeFalsy();
     });
 
+  });
+
+  describe('toString', () => {
+    let estOrig: ExperienceState;
+    let estClone: ExperienceState;
+
+    beforeEach(() => {
+      estOrig = new ExperienceState({
+        'alpha': true,
+        'beta': false,
+        'gamma': false
+      });
+      estClone = estOrig.clone();
+    });
+
+    test('should use toString for string coercion.', () => {
+      expect(estOrig.toString()).toEqual(`${estOrig}`);
+      expect(estOrig.toString()).toEqual(estOrig + '');
+    });
+
+    test('should produce equal string representations if equal.', () => {
+      expect(`${estOrig}`).toEqual(`${estClone}`);
+    });
+
+    test('should produce unequal string representations if unequal.', () => {
+      estClone.setStatelet('foo');
+      expect(`${estOrig}`).not.toEqual(`${estClone}`);
+    });
+
+    test('should produce equal strings if made equal again.', () => {
+      estOrig.setStatelet('foo');
+      estClone.setStatelet('bar');
+      expect(`${estOrig}`).not.toEqual(`${estClone}`);
+
+      estClone.setStatelet('foo');
+      estOrig.setStatelet('bar');
+      expect(`${estOrig}`).toEqual(`${estClone}`);
+    });
+
+    test('should produce equal strings even if same statelets added in different order.', () => {
+      estOrig.setStatelet('foo');
+      estOrig.setStatelet('bar');
+      estOrig.setStatelet('baz');
+      estOrig.setStatelet('quux');
+
+      estClone.setStatelet('quux');
+      estClone.setStatelet('baz');
+      estClone.setStatelet('bar');
+      estClone.setStatelet('foo');
+
+      expect(`${estOrig}`).toEqual(`${estClone}`);
+    });
   });
 });
