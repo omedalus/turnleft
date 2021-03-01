@@ -377,4 +377,91 @@ describe('ExperienceState', () => {
       expect(`${estOrig}`).toEqual(`${estClone}`);
     });
   });
+
+  describe('matches', () => {
+    test('should reciprocally match degenerate experience states.', () => {
+      const est1 = new ExperienceState();
+      const est2 = new ExperienceState();
+      expect(est1.matches(est2)).toBeTruthy();
+      expect(est2.matches(est1)).toBeTruthy();
+    });
+
+    test('should reciprocally match a degenerate experience state with a nondegenerate one.', () => {
+      const est1 = new ExperienceState({
+        'alpha': true,
+        'beta': false
+      });
+      const est2 = new ExperienceState();
+      expect(est1.matches(est2)).toBeTruthy();
+      expect(est2.matches(est1)).toBeTruthy();
+    });
+
+    test('should reciprocally match two identical states.', () => {
+      const est1 = new ExperienceState({
+        'alpha': true,
+        'beta': false
+      });
+      const est2 = est1.clone();
+      expect(est1.matches(est2)).toBeTruthy();
+      expect(est2.matches(est1)).toBeTruthy();
+    });
+
+    test('should reciprocally not match when a statelet has different value.', () => {
+      const est1 = new ExperienceState({
+        'alpha': true,
+        'beta': false
+      });
+      const est2 = new ExperienceState({
+        'alpha': false,
+        'beta': false
+      });
+      expect(est1.matches(est2)).toBeFalsy();
+      expect(est2.matches(est1)).toBeFalsy();
+    });
+
+    test('should reciprocally match again when mismatching statelet restored to same value.', () => {
+      const est1 = new ExperienceState({
+        'alpha': true,
+        'beta': false
+      });
+      const est2 = new ExperienceState({
+        'alpha': false,
+        'beta': false
+      });
+      expect(est1.matches(est2)).toBeFalsy();
+      expect(est2.matches(est1)).toBeFalsy();
+
+      est2.setStatelet('alpha', true);
+      expect(est1.matches(est2)).toBeTruthy();
+      expect(est2.matches(est1)).toBeTruthy();
+    });
+
+
+    test('should reciprocally match when no statelets overlap.', () => {
+      const est1 = new ExperienceState({
+        'alpha': true,
+        'beta': false
+      });
+      const est2 = new ExperienceState({
+        'gamma': false,
+        'delta': false
+      });
+      expect(est1.matches(est2)).toBeTruthy();
+      expect(est2.matches(est1)).toBeTruthy();
+    });
+
+    test('should reciprocally match overlapping statelets, even when there are nonoverlapping ones.', () => {
+      const est1 = new ExperienceState({
+        'alpha': true,
+        'beta': false
+      });
+      const est2 = new ExperienceState({
+        'beta': false,
+        'gamma': false
+      });
+      expect(est1.matches(est2)).toBeTruthy();
+      expect(est2.matches(est1)).toBeTruthy();
+    });
+
+  });
 });

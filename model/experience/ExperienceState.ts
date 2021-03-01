@@ -67,7 +67,16 @@ export class ExperienceState
    */
   public matches(other: ExperienceState): boolean
   {
-    throw new Error('Not implemented');
+    for (let [name, esl] of Object.entries(this._statelets)) {
+      const eslOther = other._statelets[name];
+      if (!eslOther) {
+        continue;
+      }
+      if (!esl.equals(eslOther)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
