@@ -48,7 +48,7 @@ describe('ExperienceActionConsequence', () => {
 
     test('should record a consequence.', () => {
       const exst = new ExperienceState({'alpha': true});
-      exacque.rememberConsequence(exst);
+      exacque.recordConsequence(exst);
       expect([...exacque.consequences]).toHaveLength(1);
       for (let csq of exacque.consequences) {
         expect(csq.count).toBe(1);
@@ -60,8 +60,8 @@ describe('ExperienceActionConsequence', () => {
     test('should record equal existing consequences.', () => {
       const exst1 = new ExperienceState({'alpha': true});
       const exst2 = new ExperienceState({'alpha': true});
-      exacque.rememberConsequence(exst1);
-      exacque.rememberConsequence(exst2);
+      exacque.recordConsequence(exst1);
+      exacque.recordConsequence(exst2);
       expect([...exacque.consequences]).toHaveLength(1);
       for (let csq of exacque.consequences) {
         expect(csq.count).toBe(2);
@@ -73,8 +73,8 @@ describe('ExperienceActionConsequence', () => {
     test('should count matching consequences and add new.', () => {
       const exst1 = new ExperienceState({'alpha': true, 'beta': true});
       const exst2 = new ExperienceState({'alpha': true});
-      exacque.rememberConsequence(exst1);
-      exacque.rememberConsequence(exst2);
+      exacque.recordConsequence(exst1);
+      exacque.recordConsequence(exst2);
 
       const csqs = [...exacque.consequences];
       expect(csqs).toHaveLength(2);
@@ -92,7 +92,7 @@ describe('ExperienceActionConsequence', () => {
       const action = new Action('forward');
       const exacque = new ExperienceActionConsequence(action);
       const exst = new ExperienceState({'alpha': true});
-      exacque.rememberConsequence(exst);
+      exacque.recordConsequence(exst);
 
       const csq = [...exacque.consequences][0];
       expect(csq.state.getStatelet('alpha')).not.toBeNull();

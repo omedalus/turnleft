@@ -16,7 +16,7 @@ export class ExperienceActionConsequence
     return this._action.clone();
   }
 
-  public rememberConsequence(exst: ExperienceState) {
+  public recordConsequence(exst: ExperienceState) {
     // First we increment everything that matches.
     this._subsequentStates.forEach(stc => {
       if (!stc.state.matches(exst)) {
