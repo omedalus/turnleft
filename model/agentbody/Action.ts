@@ -15,6 +15,9 @@ export class Action {
   get name() {
     return this._name;
   }
+  set name(n: string) {
+    this._name = n;
+  }
 
   public clone(): Action {
     const retval = new Action(this._name);
