@@ -5,6 +5,8 @@ from typing import Any
 import random
 import copy
 
+from Observation import Observation
+
 # When the lid is open, it exposes two buttons, top and bottom.
 # When the lid is closed, it exposes two lights, top and bottom.
 # Only one light is ever glowing at a time. You have to press
@@ -65,8 +67,8 @@ class LampButtonBoxState:
     return retval
       
     
-  def observe(self) -> set:
-    retval = set()
+  def observe(self) -> Observation:
+    retval = Observation()
     if self._is_lid_open:
       retval.add("LID_OPEN")
     else:
@@ -83,6 +85,9 @@ class LampButtonBoxState:
 
   
   def act(self, action: str) -> LampButtonBoxState:
+    # NOTE: In the future, this might be an iterator.
+    # It'll output one possible consequence of this action in this state at a time.
+    
     nextstate = copy.deepcopy(self)
     nextstate.prev_state = self
     nextstate.action_from_prev_state = action
