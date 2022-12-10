@@ -17,6 +17,10 @@ class Observation:
   def add(self, symbol: str) -> None:
     self.symbols.append(symbol)
     self.symbols.sort()
+    
+  def has(self, symbol: str) -> bool:
+    retval = symbol in self.symbols
+    return retval
 
 
   def toJSON(self) -> str:

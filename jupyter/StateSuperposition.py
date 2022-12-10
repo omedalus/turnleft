@@ -35,13 +35,13 @@ class StateSuperposition:
     for state in self.states:
       retval = retval.union(state.generate_possible_actions())
     return retval
-
-
+  
+  
   # Returns observations that we might make in this superposition, and
   # the states that might produce said observations.
-  def observe(self) -> set:    
+  def observe(self) -> list:    
     # We want to use a list of tuples rather than a set or dict, because
-    # the observation object might not be mutable.
+    # the observation object might be mutable.
     retval = []
     
     for state in self.states:
@@ -68,7 +68,7 @@ class StateSuperposition:
   # Returns True iff any comprising state's observation contains the requested symbol.
   def could_produce_observation(self, obs: str) -> bool:
     all_obses = observe()
-    for obsset in all_obses:
+    for obsset, superposition in all_obses:
       if obs in obsset:
         return True
     return False

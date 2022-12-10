@@ -35,13 +35,7 @@ class LampButtonBoxState:
     self._internal_switch = random.randint(0, 1)
     self._is_treat_forbidden = False
     self._is_treat_gotten = False
-
-    # Add tree navigation data to make this state object
-    # usable in a planning search.
-    self.prev_state = None
-    self.action_from_prev_state = None
-    self.cost = 0
-
+    
     
   def __eq__(self, other) -> bool:
     if self._is_lid_open != other._is_lid_open:
@@ -89,9 +83,9 @@ class LampButtonBoxState:
     # It'll output one possible consequence of this action in this state at a time.
     
     nextstate = copy.deepcopy(self)
-    nextstate.prev_state = self
-    nextstate.action_from_prev_state = action
-    nextstate.cost += 1
+    #nextstate.prev_state = self
+    #nextstate.action_from_prev_state = action
+    #nextstate.cost += 1
     
     if action == "OPEN_LID":
       nextstate._is_lid_open = True
