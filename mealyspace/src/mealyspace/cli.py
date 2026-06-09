@@ -19,9 +19,6 @@ def main() -> int:
             print("- B: Begin")
             print("- R: Restart")
             print("- Q: Quit")
-            print("Environment:")
-            print("  Sensors: [N=0, E=0, S=0, W=0]")
-            print("  Available actions: [N, E, S, W]")
         else:
             if environment.is_active:
                 print("Session status: ACTIVE")
@@ -31,10 +28,12 @@ def main() -> int:
 
             print("- R: Restart")
             print("- Q: Quit")
-            print("Environment:")
-            sensors = environment.sensors()
-            print("  Sensors: [N={0}, E={1}, S={2}, W={3}]".format(*sensors))
-            print("  Available actions: [N, E, S, W]")
+
+            if environment.is_active:
+                print("Environment:")
+                sensors = environment.sensors()
+                print("  Sensors: [N={0}, E={1}, S={2}, W={3}]".format(*sensors))
+                print("  Available actions: [N, E, S, W]")
 
         command = input("> ").strip().upper()
 
