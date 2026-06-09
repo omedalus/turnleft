@@ -37,7 +37,7 @@ class LLMConvoClient(SessionClient):
             "they aren't listening. You're entirely on your own."
         )
 
-        self.experience_log = ""
+        self.experience_log = "COMPREHENSIVE LOG OF PAST EXPERIENCES:\nbegin new game\n"
 
     def start(self) -> None:
         return None
@@ -46,23 +46,32 @@ class LLMConvoClient(SessionClient):
         _ = state
 
     def get_command(self, state: SessionState) -> SessionCommand:
-        s = ""
+        s = "Current game state:\n"
         if state.status is SessionStatus.RUNNING:
-            s = "Game is currently running\n"
+            s += "Game is currently running\n"
 
-            s += "  Sensors:\n"
+            s_sensors = ""
             for i, sensor_state in enumerate(state.sensors or []):
-                s += f"    {i+1}: {sensor_state}\n"
-            s += "  Actions available:\n"
+                s_sensors += f" {i+1}:{sensor_state} "
+
+            self.experience_log += f"-> sensors:{s_sensors}\n"
+            s += "Sensors:" + s_sensors + "\n"
+
+            s += "Actions available:"
             for i, action in enumerate(state.available_actions or []):
-                s += f"    {i+1}: {action}\n"
+                s += f"  {i+1}:{action}"
+            s += "\n"
 
         else:
+            self.experience_log += f"-> end game: {state.status}\n"
             s = f"Game is not currently running.\n"
             s += f"  Outcome of last game: {state.status}\n"
             s += f"  Total successes so far: {state.success_count}\n"
             s += f"  Total failures so far: {state.failure_count}\n"
             s += "Game will begin automatically after this message.\n"
+
+        self.convo.add_user_message(self.experience_log)
+        print(self.experience_log)
 
         print(s)
         self.convo.add_user_message(s)
@@ -70,6 +79,7 @@ class LLMConvoClient(SessionClient):
         print(self.convo.get_last_reply_str())
 
         if state.status is not SessionStatus.RUNNING:
+            self.experience_log += "begin new game\n"
             return SessionCommand(
                 CommandTarget.SESSION_MANAGER,
                 SessionManagerCommand.BEGIN,
@@ -79,6 +89,7 @@ class LLMConvoClient(SessionClient):
             json_response=JSONSchemaFormat({"action": int})
         )
         action_chosen = choose_action.get("action")
+        self.experience_log += f"    action: {action_chosen}\n"
         print(f"Action chosen: {action_chosen}")
 
         return SessionCommand(CommandTarget.ENVIRONMENT, action_chosen)
