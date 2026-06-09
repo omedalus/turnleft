@@ -34,7 +34,19 @@ class LLMConvoClient(SessionClient):
             "you will be talking only to yourself, and will receive "
             "no guidance, advice, or feedback from the developer "
             "nor the user. If you want to try out an idea, don't ask them; "
-            "they aren't listening. You're entirely on your own."
+            "they aren't listening. You're entirely on your own. "
+            "Exercise patience, diligence, creativity, and tenacity. "
+            "Don't give up or get discouraged, even if you fail many times. "
+            "You're literally a machine in a confined environment that's "
+            "been tasked with solving a puzzle; you've got all the time "
+            "in the universe. PRO TIP: If you get stuck, consult your memory "
+            "and see if there are situation+action combinations that "
+            "you haven't tried yet. You might also try to think about the game "
+            "in a different way, or to interpret the sensor information differently. "
+            "PRO TIP: Don't be afraid to revisit and re-try actions that "
+            "you've tried before. You may discover nondeterministic behavior, "
+            "or you may discover that there are underlying hidden variables "
+            "that affect the game state but that aren't directly observable in the sensors. "
         )
 
         self.experience_log = "COMPREHENSIVE LOG OF PAST EXPERIENCES:\nbegin new game\n"
@@ -75,6 +87,19 @@ class LLMConvoClient(SessionClient):
 
         print(s)
         self.convo.add_user_message(s)
+
+        self.convo.submit_developer_message(
+            "What did you learn from the results of that last move?"
+        )
+        print(self.convo.get_last_reply_str())
+
+        self.convo.submit_developer_message(
+            "Describe your current mental model of the relationship "
+            "between your actions and your sensor readings. "
+            "How do you think the game works? "
+        )
+        print(self.convo.get_last_reply_str())
+
         self.convo.submit_developer_message("Discuss your next move.")
         print(self.convo.get_last_reply_str())
 
@@ -86,7 +111,15 @@ class LLMConvoClient(SessionClient):
             )
 
         choose_action = self.convo.submit(
-            json_response=JSONSchemaFormat({"action": int})
+            json_response=JSONSchemaFormat(
+                {
+                    "action": [
+                        int,
+                        f"The number of the action to take, from 1 to {len(state.available_actions)}",
+                        (1, len(state.available_actions)),
+                    ]
+                }
+            ),
         )
         action_chosen = choose_action.get("action")
         self.experience_log += f"    action: {action_chosen}\n"
