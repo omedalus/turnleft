@@ -13,11 +13,22 @@ class SessionManager:
     def reset(self) -> None:
         self.environment = Environment()
 
-    def available_commands(self) -> tuple[str, ...]:
-        commands: list[str] = ["B", "R", "Q"]
-
+    def session_commands(self) -> tuple[str, ...]:
         if self.environment is not None and self.environment.is_active:
-            commands.extend(self.environment.available_moves())
+            return ("R", "Q")
+
+        return ("B", "R", "Q")
+
+    def environment_commands(self) -> tuple[str, ...]:
+        if self.environment is not None and self.environment.is_active:
+            return self.environment.available_moves()
+
+        return ()
+
+    def available_commands(self) -> tuple[str, ...]:
+        commands: list[str] = list(self.session_commands())
+
+        commands.extend(self.environment_commands())
 
         return tuple(commands)
 
@@ -26,6 +37,11 @@ class SessionManager:
             return False
 
         if command == "B":
+            if self.environment is not None and self.environment.is_active:
+                raise ValueError(
+                    "Cannot begin while a round is active. Use R to restart."
+                )
+
             self.begin()
             return True
 

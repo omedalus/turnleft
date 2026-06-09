@@ -26,7 +26,15 @@ def main() -> int:
                 result = "SUCCESS" if environment.was_success else "FAILURE"
                 print(f"Round status: COMPLETE ({result})")
 
-        print("Available commands: " + ", ".join(session_manager.available_commands()))
+        session_commands = session_manager.session_commands()
+        environment_commands = session_manager.environment_commands()
+
+        print("Session commands: " + ", ".join(session_commands))
+
+        if environment_commands:
+            print("Environment commands: " + ", ".join(environment_commands))
+        else:
+            print("Environment commands: (none)")
 
         command = input("> ").strip().upper()
 
