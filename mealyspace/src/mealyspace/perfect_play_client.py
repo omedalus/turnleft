@@ -17,8 +17,6 @@ class PerfectPlayClient(SessionClient):
             raise ValueError("total_sessions must be at least 1")
 
         self.total_sessions = total_sessions
-        self.command_target = CommandTarget.SESSION_MANAGER
-        self.command_value: SessionManagerCommand | int = SessionManagerCommand.BEGIN
         self._phase = 0
         self._pending_actions: list[int] = []
 
@@ -31,15 +29,17 @@ class PerfectPlayClient(SessionClient):
     def get_command(self, state: SessionState) -> SessionCommand:
         completed_sessions = state.success_count + state.failure_count
         if completed_sessions >= self.total_sessions:
-            self.command_target = CommandTarget.SESSION_MANAGER
-            self.command_value = SessionManagerCommand.QUIT
-            return SessionCommand(self.command_target, self.command_value)
+            return SessionCommand(
+                CommandTarget.SESSION_MANAGER,
+                SessionManagerCommand.QUIT,
+            )
 
         if state.status is not SessionStatus.RUNNING:
             self._reset_round_plan()
-            self.command_target = CommandTarget.SESSION_MANAGER
-            self.command_value = SessionManagerCommand.BEGIN
-            return SessionCommand(self.command_target, self.command_value)
+            return SessionCommand(
+                CommandTarget.SESSION_MANAGER,
+                SessionManagerCommand.BEGIN,
+            )
 
         if self._phase == 0:
             self._phase = 1
@@ -66,9 +66,7 @@ class PerfectPlayClient(SessionClient):
         return 0
 
     def _environment_command(self, action: int) -> SessionCommand:
-        self.command_target = CommandTarget.ENVIRONMENT
-        self.command_value = action
-        return SessionCommand(self.command_target, self.command_value)
+        return SessionCommand(CommandTarget.ENVIRONMENT, action)
 
     def _reset_round_plan(self) -> None:
         self._phase = 0

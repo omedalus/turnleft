@@ -17,8 +17,6 @@ class AlwaysGoEastClient(SessionClient):
             raise ValueError("total_sessions must be at least 1")
 
         self.total_sessions = total_sessions
-        self.command_target = CommandTarget.SESSION_MANAGER
-        self.command_value: SessionManagerCommand | int = SessionManagerCommand.BEGIN
 
     def start(self) -> None:
         return None
@@ -29,22 +27,22 @@ class AlwaysGoEastClient(SessionClient):
     def get_command(self, state: SessionState) -> SessionCommand:
         completed_sessions = state.success_count + state.failure_count
         if completed_sessions >= self.total_sessions:
-            self.command_target = CommandTarget.SESSION_MANAGER
-            self.command_value = SessionManagerCommand.QUIT
-            return SessionCommand(self.command_target, self.command_value)
+            return SessionCommand(
+                CommandTarget.SESSION_MANAGER,
+                SessionManagerCommand.QUIT,
+            )
 
         if state.status is SessionStatus.RUNNING:
             if state.sensors is None:
                 raise ValueError("Running state must include sensors.")
 
             action = 1 if state.sensors[0] else 2
-            self.command_target = CommandTarget.ENVIRONMENT
-            self.command_value = action
-            return SessionCommand(self.command_target, self.command_value)
+            return SessionCommand(CommandTarget.ENVIRONMENT, action)
 
-        self.command_target = CommandTarget.SESSION_MANAGER
-        self.command_value = SessionManagerCommand.BEGIN
-        return SessionCommand(self.command_target, self.command_value)
+        return SessionCommand(
+            CommandTarget.SESSION_MANAGER,
+            SessionManagerCommand.BEGIN,
+        )
 
     def show_error(self, message: str) -> None:
         raise RuntimeError(message)

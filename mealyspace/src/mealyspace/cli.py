@@ -11,8 +11,7 @@ from mealyspace.session_manager import (
 
 class ConsoleClient(SessionClient):
     def __init__(self) -> None:
-        self.command_target = CommandTarget.SESSION_MANAGER
-        self.command_value: SessionManagerCommand | int = SessionManagerCommand.BEGIN
+        pass
 
     def start(self) -> None:
         print("Mealy Space")
@@ -49,20 +48,21 @@ class ConsoleClient(SessionClient):
         _ = state
         raw = input("> ").strip().upper()
 
+        command_target: CommandTarget = CommandTarget.SESSION_MANAGER
+        command_value: SessionManagerCommand | int = SessionManagerCommand.BEGIN
         if raw == "B":
-            self.command_target = CommandTarget.SESSION_MANAGER
-            self.command_value = SessionManagerCommand.BEGIN
+            pass
         elif raw == "Q":
-            self.command_target = CommandTarget.SESSION_MANAGER
-            self.command_value = SessionManagerCommand.QUIT
+            command_target = CommandTarget.SESSION_MANAGER
+            command_value = SessionManagerCommand.QUIT
         else:
             action = self._parse_action(raw)
-            self.command_target = CommandTarget.ENVIRONMENT
-            self.command_value = action
+            command_target = CommandTarget.ENVIRONMENT
+            command_value = action
 
         return SessionCommand(
-            command_target=self.command_target,
-            command_value=self.command_value,
+            command_target=command_target,
+            command_value=command_value,
         )
 
     def show_error(self, message: str) -> None:
