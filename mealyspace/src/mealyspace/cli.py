@@ -15,26 +15,26 @@ def main() -> int:
         environment = session_manager.environment
 
         if environment is None:
-            print("No active environment. Enter B to begin.")
+            print("Session status: IDLE")
+            print("- B: Begin")
+            print("- R: Restart")
+            print("- Q: Quit")
+            print("Environment:")
+            print("  Sensors: [N=0, E=0, S=0, W=0]")
+            print("  Available actions: [N, E, S, W]")
         else:
-            x, y = environment.position()
-            print(f"Current position: ({x}, {y})")
-
             if environment.is_active:
-                print("Round status: ACTIVE")
+                print("Session status: ACTIVE")
             else:
                 result = "SUCCESS" if environment.was_success else "FAILURE"
-                print(f"Round status: COMPLETE ({result})")
+                print(f"Session status: COMPLETE ({result})")
 
-        session_commands = session_manager.session_commands()
-        environment_commands = session_manager.environment_commands()
-
-        print("Session commands: " + ", ".join(session_commands))
-
-        if environment_commands:
-            print("Environment commands: " + ", ".join(environment_commands))
-        else:
-            print("Environment commands: (none)")
+            print("- R: Restart")
+            print("- Q: Quit")
+            print("Environment:")
+            sensors = environment.sensors()
+            print("  Sensors: [N={0}, E={1}, S={2}, W={3}]".format(*sensors))
+            print("  Available actions: [N, E, S, W]")
 
         command = input("> ").strip().upper()
 

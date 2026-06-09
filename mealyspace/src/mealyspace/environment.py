@@ -16,18 +16,13 @@ class Environment:
         if not self.is_active:
             return ()
 
-        moves: list[str] = []
+        return ("N", "E", "S", "W")
 
-        for direction, dx, dy in (
-            ("N", 0, 1),
-            ("E", 1, 0),
-            ("S", 0, -1),
-            ("W", -1, 0),
-        ):
-            if self.is_traversible(self.x + dx, self.y + dy):
-                moves.append(direction)
-
-        return tuple(moves)
+    def sensors(self) -> tuple[int, int, int, int]:
+        return tuple(
+            int(self.is_traversible(self.x + dx, self.y + dy))
+            for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0))
+        )
 
     def is_traversible(self, x: int, y: int) -> bool:
         if x == 0:
