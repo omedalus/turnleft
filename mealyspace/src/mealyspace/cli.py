@@ -16,7 +16,7 @@ class ConsoleClient(SessionClient):
 
     def start(self) -> None:
         print("Mealy Space")
-        print("Commands: B begin new round, A1-A4 (or 1-4) move, Q quit.")
+        print("Commands: B begin new round, A<number> (or number) move, Q quit.")
 
     def render(self, state: SessionState) -> None:
         print(f"\nSuccesses: {state.success_count}  Failures: {state.failure_count}")
@@ -26,16 +26,24 @@ class ConsoleClient(SessionClient):
         print("- B: Begin")
         print("- Q: Quit")
 
-        if state.status is SessionStatus.RUNNING:
-            print("- A1: Move North")
-            print("- A2: Move East")
-            print("- A3: Move South")
-            print("- A4: Move West")
+        if (
+            state.status is SessionStatus.RUNNING
+            and state.available_actions is not None
+        ):
+            for action, is_available in enumerate(state.available_actions, start=1):
+                if is_available:
+                    print(f"- A{action}: Execute action {action}")
 
         if state.sensors is not None:
             print("Environment:")
-            print("  Sensors: [S1={0}, S2={1}, S3={2}, S4={3}]".format(*state.sensors))
-            print("  Available actions: [A1, A2, A3, A4]")
+            sensor_tokens = [
+                f"S{index}={value}"
+                for index, value in enumerate(state.sensors, start=1)
+            ]
+            print(f"  Sensors: [{' '.join(sensor_tokens)}]")
+
+        if state.available_actions is not None:
+            print(f"  Available actions: {list(state.available_actions)}")
 
     def get_command(self, state: SessionState) -> SessionCommand:
         _ = state
@@ -65,11 +73,11 @@ class ConsoleClient(SessionClient):
         return 0
 
     def _parse_action(self, raw: str) -> int:
-        if raw in {"1", "2", "3", "4"}:
+        if raw.isdigit() and int(raw) > 0:
             return int(raw)
 
-        if raw in {"A1", "A2", "A3", "A4"}:
-            return int(raw[1])
+        if raw.startswith("A") and raw[1:].isdigit() and int(raw[1:]) > 0:
+            return int(raw[1:])
 
         raise ValueError(f"Invalid command: {raw}")
 

@@ -34,6 +34,7 @@ class SessionState:
     failure_count: int
     status: SessionStatus
     sensors: tuple[bool, bool, bool, bool] | None
+    available_actions: tuple[bool, ...] | None
 
 
 class SessionClient(Protocol):
@@ -63,9 +64,11 @@ class SessionManager:
         if environment is None:
             status = SessionStatus.FINISHED_WITH_NO_RESULT
             sensors = None
+            available_actions = None
         elif environment.is_active:
             status = SessionStatus.RUNNING
             sensors = environment.sensors()
+            available_actions = environment.get_available_actions()
         else:
             status = (
                 SessionStatus.FINISHED_WITH_VICTORY
@@ -73,12 +76,14 @@ class SessionManager:
                 else SessionStatus.FINISHED_WITH_DEFEAT
             )
             sensors = None
+            available_actions = None
 
         return SessionState(
             success_count=self.success_count,
             failure_count=self.failure_count,
             status=status,
             sensors=sensors,
+            available_actions=available_actions,
         )
 
     def run(self, client: SessionClient) -> int:
@@ -114,11 +119,22 @@ class SessionManager:
         if not isinstance(command.command_value, int):
             raise ValueError("Environment command must be a numeric action.")
 
+        if command.command_value < 1:
+            raise ValueError("Environment action must be a positive integer.")
+
         if self.environment is None:
             raise ValueError("No environment. Use B to begin.")
 
         if not self.environment.is_active:
             raise ValueError("Round is over. Use B to start a new round.")
+
+        available_actions = self.environment.get_available_actions()
+        action_index = command.command_value - 1
+        if action_index >= len(available_actions):
+            raise ValueError(f"Invalid action: {command.command_value}")
+
+        if not available_actions[action_index]:
+            raise ValueError(f"Action {command.command_value} is not available.")
 
         self.environment.execute_action(command.command_value)
 

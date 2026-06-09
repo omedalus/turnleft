@@ -20,6 +20,9 @@ class Environment:
 
         return ("N", "E", "S", "W")
 
+    def get_available_actions(self) -> tuple[bool, ...]:
+        return (True, True, True, True)
+
     def sensors(self) -> tuple[bool, bool, bool, bool]:
         return (
             self.is_traversible(self.x, self.y + 1),
