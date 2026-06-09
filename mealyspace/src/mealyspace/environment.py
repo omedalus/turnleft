@@ -5,14 +5,17 @@ class Environment:
     def __init__(self) -> None:
         self.x = 0
         self.y = 0
-        self.success_count = 0
-        self.failure_count = 0
         self.is_victory_path_east = bool(getrandbits(1))
+        self.is_active = True
+        self.was_success: bool | None = None
 
     def position(self) -> tuple[int, int]:
         return self.x, self.y
 
     def available_moves(self) -> tuple[str, ...]:
+        if not self.is_active:
+            return ()
+
         moves: list[str] = []
 
         for direction, dx, dy in (
@@ -38,21 +41,9 @@ class Environment:
     def is_end_of_maze(self, x: int, y: int) -> bool:
         return y == 1 and x in {-2, 2}
 
-    def reset_position(self) -> None:
-        self.x = 0
-        self.y = 0
-
-    def reroll_victory_path(self) -> None:
-        self.is_victory_path_east = bool(getrandbits(1))
-
     def end_round(self, success: bool) -> None:
-        if success:
-            self.success_count += 1
-        else:
-            self.failure_count += 1
-
-        self.reset_position()
-        self.reroll_victory_path()
+        self.was_success = success
+        self.is_active = False
 
     def handle_maze_end(self, x: int, y: int) -> None:
         if self.is_victory_path_east and x == 2 and y == 1:
@@ -66,6 +57,9 @@ class Environment:
         self.end_round(False)
 
     def move(self, direction: str) -> None:
+        if not self.is_active:
+            raise ValueError("Round is not active. Begin or reset to continue.")
+
         next_x = self.x
         next_y = self.y
 
@@ -89,13 +83,3 @@ class Environment:
 
         if self.is_end_of_maze(next_x, next_y):
             self.handle_maze_end(next_x, next_y)
-
-    def handle_command(self, command: str) -> bool:
-        if command == "Q":
-            return False
-
-        if command in {"N", "E", "S", "W"}:
-            self.move(command)
-            return True
-
-        raise ValueError(f"Invalid command: {command}")
