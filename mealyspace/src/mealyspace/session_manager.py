@@ -1,5 +1,8 @@
 from mealyspace.environment import Environment
 
+ACTION_LABELS = ("A1", "A2", "A3", "A4")
+ACTION_INPUT_TO_DIRECTION = {"1": "N", "2": "E", "3": "S", "4": "W"}
+
 
 class SessionManager:
     def __init__(self) -> None:
@@ -21,7 +24,7 @@ class SessionManager:
 
     def environment_commands(self) -> tuple[str, ...]:
         if self.environment is not None and self.environment.is_active:
-            return self.environment.available_moves()
+            return ACTION_LABELS
 
         return ()
 
@@ -49,7 +52,7 @@ class SessionManager:
             self.reset()
             return True
 
-        if command not in {"N", "E", "S", "W"}:
+        if command not in ACTION_INPUT_TO_DIRECTION:
             raise ValueError(f"Invalid command: {command}")
 
         if self.environment is None:
@@ -58,7 +61,7 @@ class SessionManager:
         if not self.environment.is_active:
             raise ValueError("Round is over. Use B or R to start a new round.")
 
-        self.environment.move(command)
+        self.environment.move(ACTION_INPUT_TO_DIRECTION[command])
 
         if not self.environment.is_active:
             if self.environment.was_success:

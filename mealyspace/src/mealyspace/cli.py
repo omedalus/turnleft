@@ -5,7 +5,7 @@ def main() -> int:
     session_manager = SessionManager()
 
     print("Mealy Space")
-    print("Commands: B begin, R restart, N/E/S/W move, Q quit.")
+    print("Commands: B begin, R restart, 1-4 move, Q quit.")
 
     while True:
         print(
@@ -32,8 +32,8 @@ def main() -> int:
             if environment.is_active:
                 print("Environment:")
                 sensors = environment.sensors()
-                print("  Sensors: [N={0}, E={1}, S={2}, W={3}]".format(*sensors))
-                print("  Available actions: [N, E, S, W]")
+                print("  Sensors: [S1={0}, S2={1}, S3={2}, S4={3}]".format(*sensors))
+                print("  Available actions: [A1, A2, A3, A4]")
 
         command = input("> ").strip().upper()
 
