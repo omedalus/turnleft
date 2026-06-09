@@ -1,29 +1,39 @@
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Protocol
 
 from mealyspace.environment import Environment
 
-ACTION_LABELS = ("A1", "A2", "A3", "A4")
-ACTION_INPUT_TO_DIRECTION = {
-    "1": "N",
-    "2": "E",
-    "3": "S",
-    "4": "W",
-    "A1": "N",
-    "A2": "E",
-    "A3": "S",
-    "A4": "W",
-}
+
+class SessionStatus(StrEnum):
+    RUNNING = "running"
+    FINISHED_WITH_VICTORY = "finished with victory"
+    FINISHED_WITH_DEFEAT = "finished with defeat"
+    FINISHED_WITH_NO_RESULT = "finished with no result"
+
+
+class CommandTarget(StrEnum):
+    ENVIRONMENT = "ENVIRONMENT"
+    SESSION_MANAGER = "SESSION_MANAGER"
+
+
+class SessionManagerCommand(StrEnum):
+    BEGIN = "BEGIN"
+    QUIT = "QUIT"
+
+
+@dataclass(frozen=True, slots=True)
+class SessionCommand:
+    command_target: CommandTarget
+    command_value: SessionManagerCommand | int
 
 
 @dataclass(frozen=True, slots=True)
 class SessionState:
     success_count: int
     failure_count: int
-    status: str
-    result: str | None
-    sensors: tuple[int, int, int, int] | None
-    available_commands: tuple[str, ...]
+    status: SessionStatus
+    sensors: tuple[bool, bool, bool, bool] | None
 
 
 class SessionClient(Protocol):
@@ -31,7 +41,7 @@ class SessionClient(Protocol):
 
     def render(self, state: SessionState) -> None: ...
 
-    def get_command(self, state: SessionState) -> str: ...
+    def get_command(self, state: SessionState) -> SessionCommand: ...
 
     def show_error(self, message: str) -> None: ...
 
@@ -47,45 +57,28 @@ class SessionManager:
     def begin(self) -> None:
         self.environment = Environment()
 
-    def session_commands(self) -> tuple[str, ...]:
-        return ("B", "Q")
-
-    def environment_commands(self) -> tuple[str, ...]:
-        if self.environment is not None and self.environment.is_active:
-            return ACTION_LABELS
-
-        return ()
-
-    def available_commands(self) -> tuple[str, ...]:
-        commands: list[str] = list(self.session_commands())
-
-        commands.extend(self.environment_commands())
-
-        return tuple(commands)
-
     def state(self) -> SessionState:
         environment = self.environment
 
         if environment is None:
-            status = "IDLE"
-            result = None
+            status = SessionStatus.FINISHED_WITH_NO_RESULT
             sensors = None
         elif environment.is_active:
-            status = "ACTIVE"
-            result = None
+            status = SessionStatus.RUNNING
             sensors = environment.sensors()
         else:
-            status = "COMPLETE"
-            result = "SUCCESS" if environment.was_success else "FAILURE"
+            status = (
+                SessionStatus.FINISHED_WITH_VICTORY
+                if environment.was_success
+                else SessionStatus.FINISHED_WITH_DEFEAT
+            )
             sensors = None
 
         return SessionState(
             success_count=self.success_count,
             failure_count=self.failure_count,
             status=status,
-            result=result,
             sensors=sensors,
-            available_commands=self.available_commands(),
         )
 
     def run(self, client: SessionClient) -> int:
@@ -93,10 +86,9 @@ class SessionManager:
 
         while True:
             state = self.state()
-            client.render(state)
-            command = client.get_command(state)
-
             try:
+                client.render(state)
+                command = client.get_command(state)
                 should_continue = self.handle_command(command)
             except ValueError as error:
                 client.show_error(str(error))
@@ -105,16 +97,22 @@ class SessionManager:
             if not should_continue:
                 return client.stop()
 
-    def handle_command(self, command: str) -> bool:
-        if command == "Q":
-            return False
+    def handle_command(self, command: SessionCommand) -> bool:
+        if command.command_target is CommandTarget.SESSION_MANAGER:
+            if command.command_value is SessionManagerCommand.QUIT:
+                return False
 
-        if command == "B":
-            self.begin()
-            return True
+            if command.command_value is SessionManagerCommand.BEGIN:
+                self.begin()
+                return True
 
-        if command not in ACTION_INPUT_TO_DIRECTION:
-            raise ValueError(f"Invalid command: {command}")
+            raise ValueError("Invalid session-manager command.")
+
+        if command.command_target is not CommandTarget.ENVIRONMENT:
+            raise ValueError("Invalid command target.")
+
+        if not isinstance(command.command_value, int):
+            raise ValueError("Environment command must be a numeric action.")
 
         if self.environment is None:
             raise ValueError("No environment. Use B to begin.")
@@ -122,7 +120,7 @@ class SessionManager:
         if not self.environment.is_active:
             raise ValueError("Round is over. Use B to start a new round.")
 
-        self.environment.move(ACTION_INPUT_TO_DIRECTION[command])
+        self.environment.execute_action(command.command_value)
 
         if not self.environment.is_active:
             if self.environment.was_success:

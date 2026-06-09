@@ -1,5 +1,7 @@
 from random import getrandbits
 
+ACTION_TO_DIRECTION = {1: "N", 2: "E", 3: "S", 4: "W"}
+
 
 class Environment:
     def __init__(self) -> None:
@@ -18,12 +20,12 @@ class Environment:
 
         return ("N", "E", "S", "W")
 
-    def sensors(self) -> tuple[int, int, int, int]:
+    def sensors(self) -> tuple[bool, bool, bool, bool]:
         return (
-            int(self.is_traversible(self.x, self.y + 1)),
-            int(self.is_traversible(self.x + 1, self.y)),
-            int(self.is_traversible(self.x, self.y - 1)),
-            int(self.is_traversible(self.x - 1, self.y)),
+            self.is_traversible(self.x, self.y + 1),
+            self.is_traversible(self.x + 1, self.y),
+            self.is_traversible(self.x, self.y - 1),
+            self.is_traversible(self.x - 1, self.y),
         )
 
     def is_traversible(self, x: int, y: int) -> bool:
@@ -55,6 +57,12 @@ class Environment:
             return
 
         self.end_round(False)
+
+    def execute_action(self, action: int) -> None:
+        if action not in ACTION_TO_DIRECTION:
+            raise ValueError(f"Invalid action: {action}")
+
+        self.move(ACTION_TO_DIRECTION[action])
 
     def move(self, direction: str) -> None:
         if not self.is_active:
