@@ -19,9 +19,11 @@ class Environment:
         return ("N", "E", "S", "W")
 
     def sensors(self) -> tuple[int, int, int, int]:
-        return tuple(
-            int(self.is_traversible(self.x + dx, self.y + dy))
-            for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0))
+        return (
+            int(self.is_traversible(self.x, self.y + 1)),
+            int(self.is_traversible(self.x + 1, self.y)),
+            int(self.is_traversible(self.x, self.y - 1)),
+            int(self.is_traversible(self.x - 1, self.y)),
         )
 
     def is_traversible(self, x: int, y: int) -> bool:
@@ -30,6 +32,9 @@ class Environment:
 
         if y == 1:
             return -2 <= x <= 2
+
+        if y == -1 and x in {-1, 1}:
+            return self.is_victory_path_east == (x == 1)
 
         return False
 
