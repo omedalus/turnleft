@@ -10,19 +10,20 @@ def main() -> int:
     while True:
         x, y = environment.position()
         print(f"\nCurrent position: ({x}, {y})")
+        print(
+            f"Successes: {environment.success_count}  Failures: {environment.failure_count}"
+        )
         print("Available moves: " + ", ".join(environment.available_moves()))
 
         command = input("> ").strip().upper()
 
-        if command == "Q":
-            print("Goodbye.")
-            return 0
-
-        if command not in environment.available_moves():
+        try:
+            if not environment.handle_command(command):
+                print("Goodbye.")
+                return 0
+        except ValueError:
             print("Invalid command. Use N, E, S, W, or Q.")
             continue
-
-        environment.move(command)
 
 
 if __name__ == "__main__":
